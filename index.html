@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NetCertPrep – Network+ & AWS CCP Study</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #21262d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --warning: #f85149;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    #root { min-height: 100vh; display: flex; flex-direction: column; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 16px; flex: 1; }
+    h1, h2 { color: var(--text); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    .flashcard {
+      perspective: 1000px;
+      height: 220px;
+      cursor: pointer;
+      margin: 20px auto;
+      max-width: 420px;
+    }
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+    .flashcard-front, .flashcard-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+    }
+    .flashcard-front {
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white;
+    }
+    .flashcard-back {
+      background: linear-gradient(135deg, #065f46, #10b981);
+      color: white;
+      transform: rotateY(180deg);
+    }
+    .label { font-size: 0.9rem; opacity: 0.8; margin-bottom: 12px; }
+    .content { font-size: 1.3rem; font-weight: 600; line-height: 1.4; }
+    button {
+      padding: 10px 20px;
+      margin: 8px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      min-width: 110px;
+    }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-secondary { background: #334155; color: white; }
+
+    @media (max-width: 600px) {
+      .flashcard { height: 260px; }
+      .content { font-size: 1.15rem; }
+      button { width: 45%; margin: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const sampleCards = [
+      { q: "What does TCP stand for?", a: "Transmission Control Protocol" },
+      { q: "Which OSI layer handles logical addressing and routing?", a: "Layer 3 – Network" },
