@@ -4,8 +4,7 @@
 
 Modern, mobile-friendly flashcards, concept summaries, practice questions, and interactive tools — built for quick review and deep understanding.
 
-[![NetCertPrep Demo](https://img.shields.io/badge/Live%20Demo-Click%20Here-blue?style=for-the-badge&logo=github)](https://glunaa.github.io/netcertprep/)  
-*(replace with your actual GitHub Pages URL once deployed)*
+[![NetCertPrep Demo](https://img.shields.io/badge/Live%20Demo-Click%20Here-blue?style=for-the-badge&logo=github)]('https://glunaa.github.io/Netcert_Prep/')
 
 ## ✨ Features
 
