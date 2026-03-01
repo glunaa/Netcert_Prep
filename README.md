@@ -1,65 +1,73 @@
-# NetCertPrep 🎓
+# React + TypeScript + Vite
 
-**Interactive study companion for CompTIA Network+ (N10-009) and AWS Certified Cloud Practitioner (CLF-C02)**
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Modern, mobile-friendly flashcards, concept summaries, practice questions, and interactive tools — built for quick review and deep understanding.
+Currently, two official plugins are available:
 
-[![NetCertPrep Demo](https://img.shields.io/badge/Live%20Demo-Click%20Here-blue?style=for-the-badge&logo=github)](https://glunaa.github.io/Netcert_Prep/)
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## ✨ Features
+## React Compiler
 
-- **Structured Study Guides**  
-  Full coverage of exam domains with tables, mnemonics, comparisons, tips & warnings
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-- **Interactive Flashcards**  
-  Tap-to-flip cards with smooth 3D animation – perfect for mobile
+## Expanding the ESLint configuration
 
-- **Practice Exams** (coming soon)  
-  Timed, domain-weighted questions with instant scoring & explanations
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-- **Specialized Tools**  
-  - VLSM subnet calculator  
-  - Cisco IOS CLI simulator  
-  - AWS VPC drag-and-drop builder  
-  - More tools planned (subnet calculator mobile fix, subnet visualizer, etc.)
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-- **Mobile-first design**  
-  Responsive layout, touch-friendly interactions, large tap targets
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-- **Zero build hassle option**  
-  Single-file HTML version runs directly in browser (great for quick demos)
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
 
-## 📚 Currently Supported Certifications
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-| Certification                        | Code     | Status              | Focus Areas                              |
-|--------------------------------------|----------|---------------------|------------------------------------------|
-| CompTIA Network+                     | N10-009  | Active              | OSI/TCP-IP, ports, routing, switching, wireless, security, troubleshooting |
-| AWS Certified Cloud Practitioner     | CLF-C02  | Active              | Cloud concepts, core services, security, billing & pricing |
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-## 🚀 Quick Start (Single-File Version)
-
-1. Download [`index.html`](index.html) from this repo  
-2. Open it in any browser (phone or desktop)  
-→ Instant flashcards + basic app shell — no installation needed
-
-Perfect for studying on the go without internet after first load.
-
-## 🛠️ Development Setup (Full Version)
-
-```bash
-# 1. Clone the repo
-git clone https://github.com/valicuh/netcertprep.git
-cd netcertprep
-
-# 2. Use Vite (recommended) or Parcel / plain React
-npm create vite@latest . -- --template react
-# or
-npm install --save-dev parcel
-
-# 3. Install dependencies
-npm install
-
-# 4. Run locally
-npm run dev     # Vite
-# or
-npx parcel index.html   # Parcel
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
