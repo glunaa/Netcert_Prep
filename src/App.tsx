@@ -1,35 +1,31 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Nav from './components/Nav'
+import HomePage from './pages/HomePage'
+import NetPlusPage from './pages/NetPlusPage'
+import AWSPage from './pages/AWSPage'
+import VLSMPage from './pages/VLSMPage'
+import CLIPage from './pages/CLIPage'
+import VPCPage from './pages/VPCPage'
+import { NetPlusTestPage, AWSTestPage } from './pages/TestPages'
 
-function App() {
-  const [count, setCount] = useState(0)
+const basename = import.meta.env.PROD ? '/Netcert_Prep' : '/'
 
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <BrowserRouter basename={basename}>
+      <div className="min-h-screen">
+        <Nav />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/netplus" element={<NetPlusPage />} />
+          <Route path="/netplus/test" element={<NetPlusTestPage />} />
+          <Route path="/aws" element={<AWSPage />} />
+          <Route path="/aws/test" element={<AWSTestPage />} />
+          <Route path="/vlsm" element={<VLSMPage />} />
+          <Route path="/cli" element={<CLIPage />} />
+          <Route path="/vpc" element={<VPCPage />} />
+        </Routes>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </BrowserRouter>
   )
 }
-
-export default App
