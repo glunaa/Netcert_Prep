@@ -68,7 +68,7 @@
 
   /* Glass card */
   .card-glass {
-    @apply bg-white/[0.03] border border-white/[0.07] rounded-xl backdrop-blur-sm;
+    @apply bg-white/3 border border-white/[0.07] rounded-xl backdrop-blur-sm;
   }
 
   /* Glow effects */

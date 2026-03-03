@@ -1,8 +1,17 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { osiLayers, portEntries, subnetCheatSheet } from '../data/referenceData'
+import {
+  tcpipModel, tcpVsUdp, tcpHandshake,
+  ipv6Rules, ipv6Types, ipv6Transition,
+  wirelessStandards, wirelessChannels, wirelessSecurity, eapTypes,
+  vlanTypes, stpPortStates, stpPortRoles, stpVariants, routingProtocols, natTypes,
+  attackTypes, defenseTools, vpnProtocols,
+  troubleshootingSteps, troubleshootingTools,
+  networkTypes, topologies, cableTypes, connectorTypes, wanTechnologies, pinouts,
+} from '../data/netplusData'
 
-type Tab = 'osi' | 'ports' | 'subnets' | 'quickfacts'
+type Tab = 'osi' | 'tcpip' | 'ports' | 'subnets' | 'ipv6' | 'wireless' | 'routing' | 'security' | 'troubleshooting' | 'networktypes' | 'quickfacts'
 
 const osiColors: Record<number, string> = {
   7: 'text-purple-400', 6: 'text-blue-400', 5: 'text-cyan-400',
@@ -15,15 +24,15 @@ const quickFacts = [
     { label: 'Cat6 (10 GbE)', value: '55 m' },
     { label: 'Cat6A (10 GbE)', value: '100 m' },
     { label: 'Single-Mode Fiber', value: 'Up to 40 km' },
-    { label: 'Multi-Mode Fiber', value: 'Up to 2 km' },
+    { label: 'Multi-Mode Fiber (OM4)', value: 'Up to 400 m at 10G' },
   ]},
   { category: 'Wireless Standards', facts: [
     { label: '802.11a — 5 GHz', value: '54 Mbps' },
     { label: '802.11b — 2.4 GHz', value: '11 Mbps' },
     { label: '802.11g — 2.4 GHz', value: '54 Mbps' },
-    { label: '802.11n — dual-band', value: '600 Mbps' },
-    { label: '802.11ac — 5 GHz', value: '3.5 Gbps' },
-    { label: '802.11ax (Wi-Fi 6)', value: '9.6 Gbps' },
+    { label: '802.11n — dual-band (Wi-Fi 4)', value: '600 Mbps' },
+    { label: '802.11ac — 5 GHz (Wi-Fi 5)', value: '3.5 Gbps' },
+    { label: '802.11ax — dual (Wi-Fi 6)', value: '9.6 Gbps' },
   ]},
   { category: 'IP Address Classes', facts: [
     { label: 'Class A', value: '1.0.0.0 – 126.x.x.x (/8)' },
@@ -77,20 +86,64 @@ const quickFacts = [
   ]},
 ]
 
+const tabs: { id: Tab; label: string }[] = [
+  { id: 'osi', label: 'OSI Model' },
+  { id: 'tcpip', label: 'TCP/IP' },
+  { id: 'ports', label: 'Ports' },
+  { id: 'subnets', label: 'Subnets' },
+  { id: 'ipv6', label: 'IPv6' },
+  { id: 'wireless', label: 'Wireless' },
+  { id: 'routing', label: 'Routing & Switching' },
+  { id: 'security', label: 'Security' },
+  { id: 'troubleshooting', label: 'Troubleshooting' },
+  { id: 'networktypes', label: 'Network Types' },
+  { id: 'quickfacts', label: 'Quick Facts' },
+]
+
+const attackCategories = [...new Set(attackTypes.map(a => a.category))]
+
 export default function NetPlusPage() {
   const [activeTab, setActiveTab] = useState<Tab>('osi')
   const [portSearch, setPortSearch] = useState('')
+  const [attackFilter, setAttackFilter] = useState('All')
 
   const filteredPorts = portEntries.filter(
     (p) => p.port.includes(portSearch) || p.service.toLowerCase().includes(portSearch.toLowerCase()) || p.description.toLowerCase().includes(portSearch.toLowerCase())
   )
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: 'osi', label: 'OSI Model' },
-    { id: 'ports', label: 'Ports' },
-    { id: 'subnets', label: 'Subnets' },
-    { id: 'quickfacts', label: 'Quick Facts' },
-  ]
+  const filteredAttacks = attackFilter === 'All' ? attackTypes : attackTypes.filter(a => a.category === attackFilter)
+
+  const SectionHeader = ({ title, color = 'accent' }: { title: string; color?: string }) => (
+    <h2 className="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+      <span className={`w-1 h-5 rounded-full inline-block bg-${color}`} />
+      {title}
+    </h2>
+  )
+
+  const Table = ({ heads, children }: { heads: string[]; children: React.ReactNode }) => (
+    <div className="card overflow-hidden mb-6">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border">
+              {heads.map(h => (
+                <th key={h} className="text-left px-4 py-3 text-subtle font-medium text-xs uppercase tracking-wider">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>{children}</tbody>
+        </table>
+      </div>
+    </div>
+  )
+
+  const Tr = ({ cells, highlight }: { cells: React.ReactNode[]; highlight?: boolean }) => (
+    <tr className={`border-b border-border/40 last:border-b-0 hover:bg-white/[0.02] transition-colors ${highlight ? 'bg-accent/5' : ''}`}>
+      {cells.map((c, i) => (
+        <td key={i} className="px-4 py-3 text-sm text-subtle align-top">{c}</td>
+      ))}
+    </tr>
+  )
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -102,8 +155,8 @@ export default function NetPlusPage() {
             <span className="tag-net">N10-009</span>
             <span className="text-subtle text-xs">CompTIA Network+</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-100">Net<span className="text-accent">+</span> Reference</h1>
-          <p className="text-subtle text-sm mt-1">Complete study guide: OSI model, ports, subnetting, and key facts.</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-slate-100">Net<span className="text-accent">+</span> Study Guide</h1>
+          <p className="text-subtle text-sm mt-1">Complete reference covering all N10-009 exam domains.</p>
         </div>
         <Link to="/netplus/test"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-void font-semibold text-sm hover:bg-accent/85 transition-colors self-start sm:self-auto whitespace-nowrap">
@@ -112,16 +165,16 @@ export default function NetPlusPage() {
       </div>
 
       {/* Tab Bar */}
-      <div className="flex gap-1 mb-6 bg-surface border border-border rounded-xl p-1 w-fit flex-wrap">
+      <div className="flex gap-1 mb-6 bg-surface border border-border rounded-xl p-1 flex-wrap">
         {tabs.map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${activeTab === tab.id ? 'bg-accent text-void' : 'text-subtle hover:text-slate-200'}`}>
+            className={`px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 ${activeTab === tab.id ? 'bg-accent text-void' : 'text-subtle hover:text-slate-200'}`}>
             {tab.label}
           </button>
         ))}
       </div>
 
-      {/* OSI Tab */}
+      {/* ─── OSI Model ─── */}
       {activeTab === 'osi' && (
         <div className="card overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-surface/50">
@@ -172,7 +225,73 @@ export default function NetPlusPage() {
         </div>
       )}
 
-      {/* Ports Tab */}
+      {/* ─── TCP/IP ─── */}
+      {activeTab === 'tcpip' && (
+        <div className="space-y-8">
+          <div>
+            <SectionHeader title="TCP/IP Model" />
+            <Table heads={['Layer', '#', 'OSI Equivalent', 'Key Protocols', 'Function']}>
+              {tcpipModel.map(l => (
+                <Tr key={l.layer} cells={[
+                  <span className="font-semibold text-accent">{l.layer}</span>,
+                  <span className="font-mono text-slate-400">{l.num}</span>,
+                  <span className="text-xs text-slate-500">{l.osiMap}</span>,
+                  <div className="flex flex-wrap gap-1">{l.protocols.map(p => <span key={p} className="text-xs bg-border/40 px-1.5 py-0.5 rounded font-mono text-slate-400">{p}</span>)}</div>,
+                  <span className="text-xs">{l.description}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="TCP vs UDP" />
+            <Table heads={['Feature', 'TCP', 'UDP']}>
+              {tcpVsUdp.map(row => (
+                <Tr key={row.feature} cells={[
+                  <span className="font-medium text-slate-300">{row.feature}</span>,
+                  <span className="text-green-400 text-xs">{row.tcp}</span>,
+                  <span className="text-yellow-400 text-xs">{row.udp}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="TCP 3-Way Handshake" />
+            <div className="card p-4 mb-6">
+              <div className="space-y-3">
+                {tcpHandshake.map(step => (
+                  <div key={step.step} className="flex items-start gap-4">
+                    <span className="w-7 h-7 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center text-accent font-bold text-xs flex-shrink-0">{step.step}</span>
+                    <div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="text-xs text-subtle font-mono">{step.direction}</span>
+                        <span className="text-xs font-bold text-green-400 bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded font-mono">{step.flag}</span>
+                      </div>
+                      <p className="text-xs text-subtle">{step.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-border">
+                <p className="text-xs text-subtle"><span className="text-slate-300 font-semibold">Connection teardown:</span> Uses 4-way handshake — FIN → ACK → FIN → ACK. Either side can initiate.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="card p-4">
+                <p className="text-xs text-accent uppercase tracking-wider font-mono mb-2">Flow Control</p>
+                <p className="text-xs text-subtle">Windowing — receiver advertises receive window (rwnd) size. Sender cannot send more than window allows. Window scales dynamically based on buffer availability.</p>
+              </div>
+              <div className="card p-4">
+                <p className="text-xs text-accent uppercase tracking-wider font-mono mb-2">Congestion Control</p>
+                <p className="text-xs text-subtle">Slow start → Congestion Avoidance → Fast Retransmit → Fast Recovery. TCP adjusts transmission rate based on network conditions (packet loss, RTT).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Ports ─── */}
       {activeTab === 'ports' && (
         <div className="space-y-4">
           <div className="relative">
@@ -231,7 +350,7 @@ export default function NetPlusPage() {
         </div>
       )}
 
-      {/* Subnets Tab */}
+      {/* ─── Subnets ─── */}
       {activeTab === 'subnets' && (
         <div className="space-y-6">
           <div className="card overflow-hidden">
@@ -274,10 +393,485 @@ export default function NetPlusPage() {
               </div>
             ))}
           </div>
+          <div className="card p-5">
+            <h3 className="font-semibold text-slate-200 text-sm mb-3">VLSM Subnetting Steps</h3>
+            <ol className="space-y-2">
+              {[
+                'Sort subnets from largest to smallest (most hosts first)',
+                'Start with the original network address',
+                'Assign the smallest possible subnet that fits the host requirement',
+                'The next subnet begins at the next network address after the assigned subnet',
+                'Repeat until all subnets are assigned',
+              ].map((step, i) => (
+                <li key={i} className="flex items-start gap-3 text-xs text-subtle">
+                  <span className="text-accent font-mono font-bold flex-shrink-0">{i + 1}.</span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       )}
 
-      {/* Quick Facts Tab */}
+      {/* ─── IPv6 ─── */}
+      {activeTab === 'ipv6' && (
+        <div className="space-y-8">
+          <div>
+            <SectionHeader title="Address Notation Rules" />
+            <Table heads={['Rule', 'Example', 'Description']}>
+              {ipv6Rules.map(r => (
+                <Tr key={r.rule} cells={[
+                  <span className="font-semibold text-slate-300">{r.rule}</span>,
+                  <code className="text-xs font-mono text-accent">{r.example}</code>,
+                  <span className="text-xs">{r.description}</span>,
+                ]} />
+              ))}
+            </Table>
+            <div className="card p-4 bg-accent/5 border-accent/20 mb-6">
+              <p className="text-xs text-subtle"><span className="text-accent font-semibold">Full address:</span> <code className="font-mono">2001:0db8:0000:0000:0000:ff00:0042:8329</code></p>
+              <p className="text-xs text-subtle mt-1"><span className="text-accent font-semibold">Compressed:</span> <code className="font-mono">2001:db8::ff00:42:8329</code></p>
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="IPv6 Address Types" />
+            <Table heads={['Type', 'Prefix', 'Description']}>
+              {ipv6Types.map(t => (
+                <Tr key={t.type} cells={[
+                  <span className="font-semibold text-accent">{t.type}</span>,
+                  <code className="text-xs font-mono text-slate-300">{t.prefix}</code>,
+                  <span className="text-xs">{t.description}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="IPv4 to IPv6 Transition Mechanisms" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {ipv6Transition.map(t => (
+                <div key={t.mechanism} className="card p-4">
+                  <h3 className="font-semibold text-slate-200 text-sm mb-1">{t.mechanism}</h3>
+                  <p className="text-xs text-subtle leading-relaxed">{t.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="card p-5">
+            <h3 className="font-semibold text-slate-200 text-sm mb-3">Key IPv6 Differences from IPv4</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                { item: 'No broadcasts', detail: 'IPv6 uses multicast instead of broadcast. All-nodes multicast = ff02::1.' },
+                { item: 'No ARP', detail: 'Neighbor Discovery Protocol (NDP) replaces ARP. Uses ICMPv6 messages.' },
+                { item: 'No DHCP required', detail: 'SLAAC (Stateless Address Autoconfiguration) uses router advertisements + EUI-64. DHCPv6 still available.' },
+                { item: 'IPSec built-in', detail: 'IPSec support is mandatory in IPv6 (vs optional in IPv4).' },
+                { item: 'Larger headers', detail: '40-byte fixed header (simpler than IPv4\'s variable header). Extension headers handle options.' },
+                { item: 'EUI-64', detail: 'Interface ID derived from 48-bit MAC address. Insert FFFE in middle, flip 7th bit of first octet.' },
+              ].map(item => (
+                <div key={item.item} className="flex gap-3">
+                  <span className="text-accent font-mono text-xs mt-0.5 flex-shrink-0">→</span>
+                  <div>
+                    <span className="text-sm font-semibold text-slate-200">{item.item}: </span>
+                    <span className="text-xs text-subtle">{item.detail}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Wireless ─── */}
+      {activeTab === 'wireless' && (
+        <div className="space-y-8">
+          <div>
+            <SectionHeader title="802.11 Standards" />
+            <div className="card overflow-hidden mb-6">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      {['Standard', 'Frequency', 'Max Speed', 'Indoor Range', 'Key Features'].map(h => (
+                        <th key={h} className="text-left px-4 py-3 text-subtle font-medium text-xs uppercase tracking-wider">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {wirelessStandards.map((s, i) => (
+                      <tr key={s.standard} className={`border-b border-border/40 last:border-b-0 hover:bg-white/[0.02] ${i === 0 ? '' : ''}`}>
+                        <td className="px-4 py-3 font-mono font-bold text-accent">{s.standard}</td>
+                        <td className="px-4 py-3 text-xs text-slate-300">{s.freq}</td>
+                        <td className="px-4 py-3 font-mono text-sm text-success">{s.maxSpeed}</td>
+                        <td className="px-4 py-3 text-xs text-subtle">{s.range}</td>
+                        <td className="px-4 py-3 text-xs text-subtle">{s.features}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="Wi-Fi Channels" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {Object.values(wirelessChannels).map(band => (
+                <div key={band.label} className="card p-4">
+                  <h3 className="font-mono text-xs text-accent uppercase tracking-wider mb-2">{band.label}</h3>
+                  <div className="mb-2">
+                    <span className="text-xs text-subtle">Non-overlapping: </span>
+                    <span className="font-mono text-sm text-slate-200">
+                      {Array.isArray(band.nonOverlapping) ? band.nonOverlapping.join(', ') : band.nonOverlapping}
+                    </span>
+                  </div>
+                  <p className="text-xs text-subtle leading-relaxed">{band.notes}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="Wireless Security" />
+            <Table heads={['Standard', 'Year', 'Encryption', 'Authentication', 'Status', 'Notes']}>
+              {wirelessSecurity.map(s => (
+                <Tr key={s.standard} cells={[
+                  <span className="font-bold text-slate-200">{s.standard}</span>,
+                  <span className="text-xs">{s.year}</span>,
+                  <code className="text-xs font-mono text-slate-300">{s.encryption}</code>,
+                  <span className="text-xs">{s.auth}</span>,
+                  <span className={`text-xs font-semibold ${s.status.includes('Deprecated') ? 'text-danger' : s.status.includes('Recommended') ? 'text-success' : 'text-yellow-400'}`}>{s.status}</span>,
+                  <span className="text-xs">{s.notes}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="EAP Types (802.1X Authentication)" />
+            <Table heads={['Type', 'Full Name', 'Tunnel', 'Inner Auth', 'Certificates', 'Notes']}>
+              {eapTypes.map(e => (
+                <Tr key={e.type} cells={[
+                  <span className="font-bold text-accent font-mono">{e.type}</span>,
+                  <span className="text-xs text-slate-300">{e.fullName}</span>,
+                  <span className="text-xs">{e.tunnel}</span>,
+                  <span className="text-xs">{e.innerAuth}</span>,
+                  <span className="text-xs">{e.cert}</span>,
+                  <span className="text-xs">{e.notes}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Routing & Switching ─── */}
+      {activeTab === 'routing' && (
+        <div className="space-y-8">
+          <div>
+            <SectionHeader title="VLANs" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+              {vlanTypes.map(v => (
+                <div key={v.type} className="card p-4">
+                  <h3 className="font-semibold text-accent text-sm mb-1">{v.type}</h3>
+                  <p className="text-xs text-subtle leading-relaxed">{v.description}</p>
+                </div>
+              ))}
+            </div>
+            <div className="card p-4 mb-6">
+              <h3 className="font-semibold text-slate-200 text-sm mb-2">802.1Q VLAN Trunking</h3>
+              <p className="text-xs text-subtle">Trunk links carry multiple VLANs using 802.1Q tagging. Each frame is tagged with a 4-byte VLAN tag (including 12-bit VLAN ID supporting 4,094 VLANs). Native VLAN frames are NOT tagged — both ends must agree on native VLAN or you risk VLAN hopping. Inter-VLAN routing requires a Layer 3 device (router or L3 switch with SVIs).</p>
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="STP Port States (802.1D)" />
+            <Table heads={['State', 'Duration', 'Activity']}>
+              {stpPortStates.map(s => (
+                <Tr key={s.state} cells={[
+                  <span className="font-semibold text-slate-200">{s.state}</span>,
+                  <span className="text-xs font-mono text-yellow-400">{s.duration}</span>,
+                  <span className="text-xs">{s.activity}</span>,
+                ]} />
+              ))}
+            </Table>
+            <SectionHeader title="STP Port Roles" />
+            <Table heads={['Role', 'Description']}>
+              {stpPortRoles.map(r => (
+                <Tr key={r.role} cells={[
+                  <span className="font-semibold text-accent">{r.role}</span>,
+                  <span className="text-xs">{r.description}</span>,
+                ]} />
+              ))}
+            </Table>
+            <SectionHeader title="STP Variants" />
+            <Table heads={['Variant', 'Standard', 'Convergence', 'Instances', 'VLANs']}>
+              {stpVariants.map(s => (
+                <Tr key={s.name} cells={[
+                  <span className="font-bold text-slate-200">{s.name}</span>,
+                  <code className="text-xs font-mono text-slate-400">{s.std}</code>,
+                  <span className="text-xs text-success">{s.convergence}</span>,
+                  <span className="text-xs">{s.instances}</span>,
+                  <span className="text-xs">{s.vlans}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="Routing Protocols" />
+            <Table heads={['Protocol', 'Type', 'Metric', 'Admin Distance', 'Convergence', 'Scope']}>
+              {routingProtocols.map(r => (
+                <Tr key={r.name} cells={[
+                  <span className="font-bold text-accent">{r.name}</span>,
+                  <span className="text-xs">{r.type}</span>,
+                  <span className="text-xs text-slate-300">{r.metric}</span>,
+                  <span className="font-mono text-sm text-yellow-400">{r.ad}</span>,
+                  <span className="text-xs">{r.convergence}</span>,
+                  <span className="text-xs">{r.scope}</span>,
+                ]} />
+              ))}
+            </Table>
+            <div className="card p-4 bg-accent/5 border-accent/20 mb-6">
+              <p className="text-xs text-subtle"><span className="text-accent font-semibold">Admin Distance (AD):</span> Lower AD = preferred route when multiple protocols know the same destination. Connected = 0, Static = 1, eBGP = 20, EIGRP = 90, OSPF = 110, IS-IS = 115, RIP = 120, iBGP = 200.</p>
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="NAT Types" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {natTypes.map(n => (
+                <div key={n.type} className="card p-4">
+                  <h3 className="font-semibold text-accent text-sm mb-1">{n.type}</h3>
+                  <div className="mb-2">
+                    <span className="text-xs font-mono bg-border/40 text-slate-400 px-2 py-0.5 rounded">{n.mapping}</span>
+                  </div>
+                  <p className="text-xs text-subtle mb-2">{n.description}</p>
+                  <code className="text-xs font-mono text-green-400">{n.example}</code>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Security ─── */}
+      {activeTab === 'security' && (
+        <div className="space-y-8">
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+              <SectionHeader title="Attack Types" />
+              <div className="flex flex-wrap gap-1 pb-4">
+                {['All', ...attackCategories].map(cat => (
+                  <button key={cat} onClick={() => setAttackFilter(cat)}
+                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all border ${attackFilter === cat ? 'bg-danger text-white border-danger' : 'bg-surface border-border text-subtle hover:text-slate-200'}`}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+              {filteredAttacks.map(a => (
+                <div key={a.name} className="card p-4 border-danger/10 hover:border-danger/25 transition-colors">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-slate-200 text-sm">{a.name}</h3>
+                    <span className="text-xs text-danger bg-danger/10 border border-danger/20 px-2 py-0.5 rounded">{a.category}</span>
+                  </div>
+                  <p className="text-xs text-subtle leading-relaxed">{a.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="Defense Tools & Techniques" />
+            <Table heads={['Tool', 'Layer', 'Description']}>
+              {defenseTools.map(d => (
+                <Tr key={d.tool} cells={[
+                  <span className="font-semibold text-success text-sm">{d.tool}</span>,
+                  <span className="text-xs font-mono text-slate-400 whitespace-nowrap">{d.layer}</span>,
+                  <span className="text-xs">{d.description}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="VPN Protocols" />
+            <Table heads={['Protocol', 'Ports', 'Encryption', 'Modes', 'Notes']}>
+              {vpnProtocols.map(v => (
+                <Tr key={v.protocol} cells={[
+                  <span className="font-bold text-accent">{v.protocol}</span>,
+                  <code className="text-xs font-mono text-slate-300">{v.ports}</code>,
+                  <span className="text-xs">{v.encryption}</span>,
+                  <span className="text-xs text-slate-300">{v.modes}</span>,
+                  <span className="text-xs">{v.notes}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Troubleshooting ─── */}
+      {activeTab === 'troubleshooting' && (
+        <div className="space-y-8">
+          <div>
+            <SectionHeader title="CompTIA Troubleshooting Methodology (7 Steps)" />
+            <div className="space-y-3 mb-6">
+              {troubleshootingSteps.map(s => (
+                <div key={s.step} className="card p-4 flex gap-4">
+                  <div className="w-8 h-8 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center text-accent font-bold text-sm flex-shrink-0">{s.step}</div>
+                  <div>
+                    <h3 className="font-semibold text-slate-200 text-sm mb-1">{s.title}</h3>
+                    <p className="text-xs text-subtle leading-relaxed">{s.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="Network Troubleshooting Tools" />
+            <Table heads={['Tool', 'OS', 'OSI Layer', 'Command Example', 'Description']}>
+              {troubleshootingTools.map(t => (
+                <Tr key={t.tool} cells={[
+                  <span className="font-bold text-accent font-mono">{t.tool}</span>,
+                  <span className="text-xs text-slate-400">{t.os}</span>,
+                  <span className="text-xs font-mono text-yellow-400">{t.layer}</span>,
+                  <code className="text-xs font-mono text-green-400 whitespace-nowrap">{t.command}</code>,
+                  <span className="text-xs">{t.description}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="card p-5">
+              <h3 className="font-semibold text-slate-200 text-sm mb-3">OSI Troubleshooting Approaches</h3>
+              <div className="space-y-2">
+                {[
+                  { approach: 'Bottom-Up', desc: 'Start at Layer 1 (physical). Good for new deployments. Check cables, LEDs, then work up.' },
+                  { approach: 'Top-Down', desc: 'Start at Layer 7 (application). Good when app works elsewhere. Check app, then work down.' },
+                  { approach: 'Divide and Conquer', desc: 'Start in the middle (Layer 3 — ping). If ping works, go up. If not, go down.' },
+                  { approach: 'Follow the Path', desc: 'Trace from source to destination systematically, checking each hop.' },
+                ].map(a => (
+                  <div key={a.approach}>
+                    <span className="text-xs font-semibold text-accent">{a.approach}: </span>
+                    <span className="text-xs text-subtle">{a.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="card p-5">
+              <h3 className="font-semibold text-slate-200 text-sm mb-3">Common Network Issues</h3>
+              <div className="space-y-2">
+                {[
+                  { issue: 'Duplicate IP', cause: 'Two devices with same IP. ARP conflicts. Check with arp -a.' },
+                  { issue: 'Broadcast storm', cause: 'Switching loop without STP. All ports flood continuously.' },
+                  { issue: 'DHCP exhaustion', cause: 'DHCP pool full. Clients get APIPA (169.254.x.x).' },
+                  { issue: 'DNS failure', cause: 'Name resolution fails but IP ping works. Check DNS server reachability.' },
+                  { issue: 'Asymmetric routing', cause: 'Packets take different paths in/out. Stateful firewall drops return traffic.' },
+                  { issue: 'MTU mismatch', cause: 'Fragmentation or drops with large packets. Test with ping -f -l 1472.' },
+                ].map(i => (
+                  <div key={i.issue}>
+                    <span className="text-xs font-semibold text-danger">{i.issue}: </span>
+                    <span className="text-xs text-subtle">{i.cause}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Network Types ─── */}
+      {activeTab === 'networktypes' && (
+        <div className="space-y-8">
+          <div>
+            <SectionHeader title="Network Types" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+              {networkTypes.map(n => (
+                <div key={n.type} className="card p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-mono font-bold text-accent text-lg">{n.type}</span>
+                    <span className="text-xs text-subtle">{n.fullName}</span>
+                  </div>
+                  <p className="text-xs text-subtle leading-relaxed">{n.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="Network Topologies" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+              {topologies.map(t => (
+                <div key={t.type} className="card p-4">
+                  <h3 className="font-semibold text-slate-200 text-sm mb-1">{t.type}</h3>
+                  <p className="text-xs text-subtle leading-relaxed">{t.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="Cabling Standards" />
+            <Table heads={['Category', 'Type', 'Max Speed', 'Max Distance', 'Notes']}>
+              {cableTypes.map(c => (
+                <Tr key={c.name} cells={[
+                  <span className="text-xs text-slate-400">{c.category}</span>,
+                  <span className="font-semibold text-slate-200">{c.name}</span>,
+                  <span className="font-mono text-xs text-success">{c.speed}</span>,
+                  <span className="font-mono text-xs text-yellow-400">{c.distance}</span>,
+                  <span className="text-xs">{c.notes}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="Common Connectors" />
+            <Table heads={['Connector', 'Media Type', 'Use Case']}>
+              {connectorTypes.map(c => (
+                <Tr key={c.connector} cells={[
+                  <span className="font-bold text-accent">{c.connector}</span>,
+                  <span className="text-xs font-mono text-slate-400">{c.type}</span>,
+                  <span className="text-xs">{c.use}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="Cable Pinouts" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+              {pinouts.map(p => (
+                <div key={p.name} className="card p-4">
+                  <h3 className="font-semibold text-accent text-sm mb-1">{p.name}</h3>
+                  <p className="text-xs text-slate-300 mb-2">{p.pairs}</p>
+                  <p className="text-xs text-subtle">{p.use}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="WAN Technologies" />
+            <Table heads={['Technology', 'Speed', 'Notes']}>
+              {wanTechnologies.map(w => (
+                <Tr key={w.tech} cells={[
+                  <span className="font-bold text-slate-200">{w.tech}</span>,
+                  <span className="font-mono text-xs text-success">{w.speed}</span>,
+                  <span className="text-xs">{w.notes}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Quick Facts ─── */}
       {activeTab === 'quickfacts' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {quickFacts.map((group) => (
