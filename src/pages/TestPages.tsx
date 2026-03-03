@@ -384,8 +384,8 @@ export function AWSTestPage() {
       accentCls="bg-aws text-void hover:bg-aws/85"
       accentBg="bg-aws"
       accentText="text-aws"
-      label="AWS SAA"
-      code="SAA-C03"
+      label="AWS CLF"
+      code="CLF-C02"
       passThreshold={72}
       examKey="aws"
       tagCls="tag-aws"
