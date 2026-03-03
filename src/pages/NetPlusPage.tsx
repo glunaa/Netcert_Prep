@@ -9,9 +9,11 @@ import {
   attackTypes, defenseTools, vpnProtocols,
   troubleshootingSteps, troubleshootingTools,
   networkTypes, topologies, cableTypes, connectorTypes, wanTechnologies, pinouts,
+  dnsRecordTypes, dnsHierarchy, dnsResolutionSteps, dnsConceptsFacts,
+  dhcpDoraSteps, dhcpComponents, dhcpRelayFacts,
 } from '../data/netplusData'
 
-type Tab = 'osi' | 'tcpip' | 'ports' | 'subnets' | 'ipv6' | 'wireless' | 'routing' | 'security' | 'troubleshooting' | 'networktypes' | 'quickfacts'
+type Tab = 'osi' | 'tcpip' | 'ports' | 'subnets' | 'ipv6' | 'wireless' | 'routing' | 'security' | 'troubleshooting' | 'networktypes' | 'dns' | 'quickfacts'
 
 const osiColors: Record<number, string> = {
   7: 'text-purple-400', 6: 'text-blue-400', 5: 'text-cyan-400',
@@ -97,6 +99,7 @@ const tabs: { id: Tab; label: string }[] = [
   { id: 'security', label: 'Security' },
   { id: 'troubleshooting', label: 'Troubleshooting' },
   { id: 'networktypes', label: 'Network Types' },
+  { id: 'dns', label: 'DNS & DHCP' },
   { id: 'quickfacts', label: 'Quick Facts' },
 ]
 
@@ -867,6 +870,102 @@ export default function NetPlusPage() {
                 ]} />
               ))}
             </Table>
+          </div>
+        </div>
+      )}
+
+      {/* ─── DNS & DHCP ─── */}
+      {activeTab === 'dns' && (
+        <div className="space-y-8">
+          <div>
+            <SectionHeader title="DNS Record Types" />
+            <Table heads={['Type', 'Description', 'Example']}>
+              {dnsRecordTypes.map(r => (
+                <Tr key={r.type} cells={[
+                  <span className="font-mono font-bold text-accent">{r.type}</span>,
+                  <span className="text-xs text-subtle">{r.description}</span>,
+                  <span className="font-mono text-xs text-success">{r.example}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="DNS Hierarchy" />
+            <Table heads={['Level', 'Description']}>
+              {dnsHierarchy.map(h => (
+                <Tr key={h.level} cells={[
+                  <span className="font-semibold text-yellow-400 whitespace-nowrap">{h.level}</span>,
+                  <span className="text-xs text-subtle">{h.description}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="DNS Resolution Process" />
+            <div className="space-y-2">
+              {dnsResolutionSteps.map((s) => (
+                <div key={s.step} className="card p-3 flex items-start gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-accent/20 text-accent font-mono text-xs flex items-center justify-center font-bold">{s.step}</span>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-200">{s.action}</p>
+                    <p className="text-xs text-subtle">{s.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="DNS Concepts & Exam Facts" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {dnsConceptsFacts.map(f => (
+                <div key={f.concept} className="card p-3">
+                  <p className="text-xs font-mono text-accent mb-1">{f.concept}</p>
+                  <p className="text-xs text-subtle">{f.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="DHCP DORA Process" />
+            <Table heads={['Step', 'Direction', 'Src Port', 'Dst Port', 'Description']}>
+              {dhcpDoraSteps.map(d => (
+                <Tr key={d.step} cells={[
+                  <span className="font-mono font-bold text-accent whitespace-nowrap">{d.step}</span>,
+                  <span className="text-xs text-slate-300 whitespace-nowrap">{d.direction}</span>,
+                  <span className="font-mono text-xs text-success">{d.srcPort}</span>,
+                  <span className="font-mono text-xs text-success">{d.dstPort}</span>,
+                  <span className="text-xs text-subtle">{d.description}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="DHCP Components" />
+            <Table heads={['Component', 'Description']}>
+              {dhcpComponents.map(c => (
+                <Tr key={c.component} cells={[
+                  <span className="font-semibold text-slate-200 whitespace-nowrap">{c.component}</span>,
+                  <span className="text-xs text-subtle">{c.description}</span>,
+                ]} />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="DHCP Relay (ip helper-address)" />
+            <div className="space-y-2">
+              {dhcpRelayFacts.map((fact, i) => (
+                <div key={i} className="card p-3 flex items-start gap-2">
+                  <span className="text-cyan-400 mt-0.5 shrink-0">›</span>
+                  <p className="text-xs text-subtle">{fact}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

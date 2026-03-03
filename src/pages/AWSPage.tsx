@@ -10,9 +10,10 @@ import {
   billingTools, supportPlans,
   infraConcepts, infraFacts,
   securityServicesSimple,
+  clfScenarioTips, clfCommonGotchas, clfDomainTips, clfServiceComparisons,
 } from '../data/awsData'
 
-type Tab = 'services' | 'cloudconcepts' | 'security' | 'wellarch' | 'billing' | 'infrastructure'
+type Tab = 'services' | 'cloudconcepts' | 'security' | 'wellarch' | 'billing' | 'infrastructure' | 'examtips'
 
 type Category = 'All' | 'Compute' | 'Storage' | 'Database' | 'Networking' | 'Security' | 'Monitoring' | 'Messaging' | 'DevOps'
 
@@ -36,6 +37,7 @@ const tabs: { id: Tab; label: string }[] = [
   { id: 'wellarch', label: 'Well-Architected' },
   { id: 'billing', label: 'Billing & Pricing' },
   { id: 'infrastructure', label: 'Infrastructure' },
+  { id: 'examtips', label: 'Exam Tips' },
 ]
 
 const secCategoryList = [...new Set(securityServicesSimple.map(s => s.category))]
@@ -569,6 +571,119 @@ export default function AWSPage() {
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ─── Exam Tips ─── */}
+      {activeTab === 'examtips' && (
+        <div className="space-y-10">
+
+          {/* Domain Weights */}
+          <div>
+            <SectionHeader title="CLF-C02 Domain Weights" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {clfDomainTips.map(d => (
+                <div key={d.domain} className="card p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-slate-200 text-sm">{d.domain}</h3>
+                    <span className="font-mono text-lg font-bold text-aws">{d.weight}</span>
+                  </div>
+                  <ul className="space-y-1.5">
+                    {d.keyPoints.map((pt, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-subtle">
+                        <span className="text-aws mt-0.5 shrink-0">›</span>
+                        <span>{pt}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Scenario → Answer */}
+          <div>
+            <SectionHeader title="If the question says… → pick" />
+            <div className="card overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left px-4 py-3 text-subtle font-medium text-xs uppercase tracking-wider w-[40%]">Scenario / Keyword</th>
+                      <th className="text-left px-4 py-3 text-subtle font-medium text-xs uppercase tracking-wider w-[25%]">Answer</th>
+                      <th className="text-left px-4 py-3 text-subtle font-medium text-xs uppercase tracking-wider">Why</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {clfScenarioTips.map(t => (
+                      <tr key={t.trigger} className="border-b border-border/40 last:border-b-0 hover:bg-white/2 transition-colors">
+                        <td className="px-4 py-3 text-xs text-subtle">{t.trigger}</td>
+                        <td className="px-4 py-3 font-mono font-semibold text-aws text-xs">{t.answer}</td>
+                        <td className="px-4 py-3 text-xs text-slate-400">{t.why}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Service Comparisons */}
+          <div>
+            <SectionHeader title="Side-by-Side Service Comparisons" />
+            <div className="space-y-4">
+              {clfServiceComparisons.map(c => (
+                <div key={c.title} className="card p-5">
+                  <h3 className="text-sm font-bold text-slate-200 mb-4">{c.title}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+                    <div>
+                      <p className="font-mono text-xs font-bold text-aws mb-2">{c.left}</p>
+                      <ul className="space-y-1">
+                        {c.leftPoints.map(p => (
+                          <li key={p} className="flex items-start gap-2 text-xs text-subtle">
+                            <span className="text-aws mt-0.5">›</span>{p}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-mono text-xs font-bold text-cyan-400 mb-2">{c.right}</p>
+                      <ul className="space-y-1">
+                        {c.rightPoints.map(p => (
+                          <li key={p} className="flex items-start gap-2 text-xs text-subtle">
+                            <span className="text-cyan-400 mt-0.5">›</span>{p}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="bg-aws/10 border border-aws/20 rounded-lg px-3 py-2">
+                    <p className="text-xs text-aws font-medium">Exam tip: {c.tip}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Common Gotchas */}
+          <div>
+            <SectionHeader title="Common Exam Gotchas" />
+            <div className="space-y-3">
+              {clfCommonGotchas.map(g => (
+                <div key={g.gotcha} className="card p-4 flex flex-col sm:flex-row gap-3">
+                  <div className="sm:w-1/2">
+                    <p className="text-xs text-subtle mb-1 uppercase tracking-wider font-mono">Common mistake</p>
+                    <p className="text-sm text-danger">{g.gotcha}</p>
+                  </div>
+                  <div className="sm:w-1/2">
+                    <p className="text-xs text-subtle mb-1 uppercase tracking-wider font-mono">Correct answer</p>
+                    <p className="text-sm text-success">{g.correction}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       )}
 

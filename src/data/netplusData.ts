@@ -418,3 +418,73 @@ export const pinouts = [
   { name: 'Crossover', pairs: 'T568A on one end, T568B on other', use: 'PC to PC, switch to switch, router to router (like-device connections). Modern switches use Auto-MDI/MDIX so often not needed.' },
   { name: 'Rollover / Console', pairs: 'Pins reversed (1↔8, 2↔7, 3↔6, 4↔5)', use: 'Cisco console cable. RJ-45 to DB-9 (or USB adapter). Used for out-of-band router/switch management.' },
 ]
+
+// ─── DNS ─────────────────────────────────────────────────────────────────────
+
+export const dnsRecordTypes = [
+  { type: 'A', description: 'Maps a hostname to an IPv4 address.', example: 'example.com → 93.184.216.34' },
+  { type: 'AAAA', description: 'Maps a hostname to an IPv6 address.', example: 'example.com → 2606:2800:220:1:248:1893:25c8:1946' },
+  { type: 'CNAME', description: 'Canonical Name — alias pointing to another hostname. Cannot coexist with other records at same name. No IP directly.', example: 'www.example.com → example.com' },
+  { type: 'MX', description: 'Mail Exchange — specifies mail server for a domain. Has a priority value (lower = higher priority).', example: 'example.com → mail.example.com (priority 10)' },
+  { type: 'PTR', description: 'Pointer — reverse DNS. Maps IP address back to hostname. Lives in in-addr.arpa zone.', example: '34.216.184.93.in-addr.arpa → example.com' },
+  { type: 'TXT', description: 'Text record — stores arbitrary text. Used for SPF (spam prevention), DKIM (email signing), DMARC, and domain ownership verification.', example: '"v=spf1 include:_spf.google.com ~all"' },
+  { type: 'NS', description: 'Name Server — lists the authoritative DNS servers for a domain. Delegated from parent zone.', example: 'example.com → ns1.example.com, ns2.example.com' },
+  { type: 'SOA', description: 'Start of Authority — first record in a zone. Contains primary nameserver, admin email, serial number, refresh/retry/expire/TTL values.', example: 'Serial 2024010101, Refresh 3600, Retry 900, Expire 604800' },
+  { type: 'SRV', description: 'Service — specifies host and port for specific services. Used by SIP, XMPP, Exchange AutoDiscover.', example: '_sip._tcp.example.com → sipserver.example.com:5060' },
+  { type: 'CAA', description: 'Certification Authority Authorization — specifies which CAs can issue SSL/TLS certs for a domain.', example: '0 issue "letsencrypt.org"' },
+]
+
+export const dnsHierarchy = [
+  { level: 'Root Zone (.)', description: 'Top of the DNS hierarchy. 13 sets of root servers (A–M). Managed by IANA. Knows where all TLD servers are.' },
+  { level: 'TLD Servers', description: 'Top-Level Domain servers for .com, .org, .net, .uk, etc. Know which authoritative servers handle each domain.' },
+  { level: 'Authoritative Name Server', description: 'The definitive source of DNS records for a domain. Answers queries about records it owns. Managed by domain owner or DNS provider.' },
+  { level: 'Recursive Resolver', description: 'The "middleman" — queries on behalf of the client. Checks its own cache first, then queries root → TLD → authoritative. Provided by ISP or Google (8.8.8.8), Cloudflare (1.1.1.1).' },
+  { level: 'DNS Cache', description: 'Resolvers and clients cache records for the duration of the TTL (Time To Live). Reduces query load and speeds up responses. flushed with ipconfig /flushdns (Windows) or systemd-resolve --flush-caches (Linux).' },
+]
+
+export const dnsResolutionSteps = [
+  { step: 1, action: 'Local cache check', detail: 'Client checks its own DNS resolver cache. If found and not expired (TTL), returns immediately.' },
+  { step: 2, action: 'Recursive resolver query', detail: 'Client asks its configured DNS resolver (ISP, 8.8.8.8, 1.1.1.1). Resolver checks its own cache.' },
+  { step: 3, action: 'Root server query', detail: 'Resolver asks a root server: "Who handles .com?" Root responds with TLD server addresses.' },
+  { step: 4, action: 'TLD server query', detail: 'Resolver asks the .com TLD server: "Who handles example.com?" TLD responds with authoritative name server.' },
+  { step: 5, action: 'Authoritative server query', detail: 'Resolver asks the authoritative NS: "What is the IP for www.example.com?" Gets the A record.' },
+  { step: 6, action: 'Response returned & cached', detail: 'Resolver caches the answer for the TTL duration, returns it to the client. Client caches it too.' },
+]
+
+export const dnsConceptsFacts = [
+  { concept: 'TTL (Time to Live)', detail: 'How long (in seconds) a DNS record is cached. Short TTL (60–300s) = faster propagation, more queries. Long TTL (3600–86400s) = fewer queries, slower changes.' },
+  { concept: 'Forward Lookup', detail: 'Resolving a hostname to an IP address. The standard direction — what you do when visiting a website.' },
+  { concept: 'Reverse Lookup', detail: 'Resolving an IP address back to a hostname using PTR records in the in-addr.arpa zone. Used for logging, email verification.' },
+  { concept: 'DNS Zone', detail: 'Administrative space in DNS. A zone file contains all records for a domain (A, MX, NS, etc.). Transferred between servers via Zone Transfer (AXFR/IXFR).' },
+  { concept: 'Split-horizon DNS', detail: 'Different DNS responses based on query source. Internal clients get private IPs; external clients get public IPs for the same hostname.' },
+  { concept: 'DNSSEC', detail: 'DNS Security Extensions. Adds cryptographic signatures to DNS records to prevent cache poisoning and man-in-the-middle attacks.' },
+  { concept: 'DNS over HTTPS (DoH)', detail: 'Encrypts DNS queries using HTTPS (port 443). Prevents ISP from seeing DNS queries. Supported in modern browsers.' },
+  { concept: 'DNS over TLS (DoT)', detail: 'Encrypts DNS queries using TLS (port 853). Similar goal to DoH but uses dedicated port.' },
+]
+
+// ─── DHCP ────────────────────────────────────────────────────────────────────
+
+export const dhcpDoraSteps = [
+  { step: 'D — Discover', srcPort: '68 (client)', dstPort: '67 (server)', direction: 'Client → Broadcast', description: 'Client broadcasts to find available DHCP servers. Source IP: 0.0.0.0. Destination: 255.255.255.255.' },
+  { step: 'O — Offer', srcPort: '67 (server)', dstPort: '68 (client)', direction: 'Server → Client (broadcast)', description: 'DHCP server responds with an IP offer, subnet mask, lease time, gateway, and DNS server.' },
+  { step: 'R — Request', srcPort: '68 (client)', dstPort: '67 (server)', direction: 'Client → Broadcast', description: 'Client broadcasts acceptance of the offer (multiple servers may have offered — this selects one and notifies all).' },
+  { step: 'A — Acknowledge', srcPort: '67 (server)', dstPort: '68 (client)', direction: 'Server → Client', description: 'Server confirms the lease. Client can now use the IP address for the lease duration.' },
+]
+
+export const dhcpComponents = [
+  { component: 'Scope', description: 'The range of IP addresses the DHCP server can assign. Example: 192.168.1.100 – 192.168.1.200.' },
+  { component: 'Lease Time', description: 'How long a client can use an assigned IP before it must renew. Clients attempt renewal at 50% of lease time.' },
+  { component: 'Exclusion Range', description: 'IP addresses within the scope that will NOT be assigned (reserved for static devices like servers, printers, routers).' },
+  { component: 'Reservation', description: 'Binds a specific IP address to a specific MAC address. That device always gets the same IP. Also called "static mapping."' },
+  { component: 'Options', description: 'Additional configuration sent with the IP: Option 3 = Default Gateway, Option 6 = DNS Servers, Option 15 = Domain Name, Option 51 = Lease Time.' },
+  { component: 'Superscope', description: 'A group of scopes merged into one administrative unit. Used when a single VLAN has multiple subnets (multinetting).' },
+]
+
+export const dhcpRelayFacts = [
+  'DHCP uses broadcasts (layer 2) which do NOT cross router boundaries by default',
+  'DHCP Relay Agent (Cisco: ip helper-address) forwards DHCP broadcasts as unicast to DHCP server on another subnet',
+  'Allows a single DHCP server to serve multiple subnets',
+  'Relay agent adds Option 82 (circuit ID, remote ID) to identify originating interface/VLAN',
+  'The DHCP server must have scopes matching each subnet\'s range to respond correctly',
+  'ip helper-address forwards 8 UDP services by default (DHCP, DNS, TFTP, BOOTP, Time, etc.)',
+]

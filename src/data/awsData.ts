@@ -444,3 +444,135 @@ export const securityServicesSimple = [
   { service: 'Config', category: 'Compliance', description: 'Tracks resource configurations and changes over time. Compliance rules and drift detection.' },
   { service: 'Artifact', category: 'Compliance', description: 'Self-service access to AWS compliance reports (SOC, PCI, ISO). Agreements like HIPAA BAA.' },
 ]
+
+// ─── CLF Exam Tips ────────────────────────────────────────────────────────────
+
+export const clfScenarioTips: { trigger: string; answer: string; why: string }[] = [
+  { trigger: 'Need to store objects/files cheaply at massive scale', answer: 'Amazon S3', why: 'Object storage, 99.999999999% durability, virtually unlimited capacity' },
+  { trigger: 'Need a relational database without managing servers', answer: 'Amazon RDS', why: 'Managed SQL: MySQL, PostgreSQL, Oracle, SQL Server, MariaDB, Aurora' },
+  { trigger: 'Run code without provisioning any servers', answer: 'AWS Lambda', why: 'Serverless compute, event-driven, pay only for invocations & duration' },
+  { trigger: 'Host a web application that needs auto-scaling', answer: 'Elastic Load Balancer + EC2 Auto Scaling', why: 'ELB distributes traffic; ASG adds/removes EC2 instances based on demand' },
+  { trigger: 'Need a globally distributed CDN to cache content', answer: 'Amazon CloudFront', why: 'CDN at 400+ PoPs worldwide, reduces latency, integrates with S3 & ALB' },
+  { trigger: 'Translate domain names to IP addresses', answer: 'Amazon Route 53', why: 'Managed DNS service, also does health checks and routing policies' },
+  { trigger: 'Need a NoSQL / key-value / document database', answer: 'Amazon DynamoDB', why: 'Serverless NoSQL, single-digit ms latency, scales to any size' },
+  { trigger: 'Protect against DDoS attacks', answer: 'AWS Shield', why: 'Standard (free, automatic) or Advanced ($3k/mo with DRT)' },
+  { trigger: 'Filter / block web traffic (SQL injection, XSS)', answer: 'AWS WAF', why: 'Web Application Firewall, works with CloudFront and ALB' },
+  { trigger: 'Detect threats / malicious activity in account', answer: 'Amazon GuardDuty', why: 'ML-based threat detection, no agents needed, analyzes logs' },
+  { trigger: 'Scan EC2 for security vulnerabilities / CVEs', answer: 'Amazon Inspector', why: 'Automated vulnerability assessment for EC2 and Lambda' },
+  { trigger: 'Find PII or sensitive data stored in S3', answer: 'Amazon Macie', why: 'ML discovers sensitive data (credit cards, SSNs) in S3' },
+  { trigger: 'Who made an API call in my AWS account?', answer: 'AWS CloudTrail', why: 'Logs every API call: who, what, when, from where — compliance & auditing' },
+  { trigger: 'Check resource compliance / config drift', answer: 'AWS Config', why: 'Tracks resource config changes, evaluates against compliance rules' },
+  { trigger: 'Store and rotate database passwords/API keys', answer: 'AWS Secrets Manager', why: 'Automatic rotation, encrypted, auditable via CloudTrail' },
+  { trigger: 'Monitor metrics and set alarms for AWS resources', answer: 'Amazon CloudWatch', why: 'Metrics, logs, alarms, dashboards — the main monitoring service' },
+  { trigger: 'Need to see cost breakdown and usage reports', answer: 'AWS Cost Explorer', why: 'Visualize spending over time, filter by service/tag/account' },
+  { trigger: 'Get alerts when you approach budget limits', answer: 'AWS Budgets', why: 'Set cost/usage thresholds, get SNS/email alerts when exceeded' },
+  { trigger: 'Consolidate billing for multiple AWS accounts', answer: 'AWS Organizations', why: 'Single payer account, volume discounts, SCPs for governance' },
+  { trigger: 'Need compliance reports / HIPAA/PCI docs', answer: 'AWS Artifact', why: 'Self-service compliance reports and agreements, not a security tool' },
+  { trigger: 'In-memory caching to speed up database reads', answer: 'Amazon ElastiCache', why: 'Redis or Memcached, sub-ms latency, reduces DB load' },
+  { trigger: 'Migrate on-premises data to AWS at scale', answer: 'AWS Snowball / Snow Family', why: 'Physical devices: Edge (100TB), Ball (petabytes), mobile (disconnected)' },
+  { trigger: 'Connect on-premises network to AWS securely', answer: 'AWS VPN or AWS Direct Connect', why: 'VPN = over internet (fast setup), Direct Connect = dedicated line (low latency)' },
+  { trigger: 'Decouple microservices with a message queue', answer: 'Amazon SQS', why: 'Managed message queue, async decoupling, Standard and FIFO types' },
+  { trigger: 'Pub/sub notifications to multiple subscribers', answer: 'Amazon SNS', why: 'Push messages to SQS, Lambda, HTTP, email, SMS simultaneously' },
+]
+
+export const clfCommonGotchas: { gotcha: string; correction: string }[] = [
+  { gotcha: 'CloudTrail = monitoring performance', correction: 'CloudTrail = API call logging (who did what). CloudWatch = performance metrics & alarms.' },
+  { gotcha: 'Shield = web traffic filtering', correction: 'Shield = DDoS protection. WAF = filter web requests (SQL injection, XSS).' },
+  { gotcha: 'Inspector = threat detection like GuardDuty', correction: 'Inspector = vulnerability scanning of EC2/Lambda. GuardDuty = threat detection via ML.' },
+  { gotcha: 'Macie = compliance documents', correction: 'Macie = finds PII in S3. Artifact = compliance reports (SOC, PCI, ISO).' },
+  { gotcha: 'Config = monitoring service', correction: 'Config = tracks config changes & compliance drift. Not a performance monitoring service.' },
+  { gotcha: 'Reserved Instances = the cheapest for all cases', correction: 'Spot Instances can be up to 90% cheaper, but can be interrupted. Reserved = commitment discounts.' },
+  { gotcha: 'S3 Standard is for all storage needs', correction: 'S3 has tiers: Standard (frequent), IA (infrequent), Glacier (archival). Pick based on access frequency.' },
+  { gotcha: 'IAM is a regional service', correction: 'IAM is GLOBAL. Resources like EC2, S3 buckets are regional.' },
+  { gotcha: 'The Shared Responsibility Model: AWS manages everything', correction: 'Customer is ALWAYS responsible for: data classification, IAM, app code, OS patching on EC2.' },
+  { gotcha: 'Well-Architected has 5 pillars', correction: 'It has 6 pillars: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, Sustainability.' },
+  { gotcha: 'AWS Business Support = 24/7 phone support', correction: 'Business Support has 24/7 phone but SLA is 1-hour for critical. Basic and Developer do NOT have phone support.' },
+  { gotcha: 'Direct Connect is the same as VPN', correction: 'Direct Connect = dedicated private fiber (consistent, low latency). VPN = encrypted tunnel over the internet.' },
+]
+
+export const clfDomainTips: { domain: string; weight: string; keyPoints: string[] }[] = [
+  {
+    domain: 'Cloud Concepts',
+    weight: '24%',
+    keyPoints: [
+      '6 advantages of cloud: trade CapEx for OpEx, massive economies of scale, stop guessing capacity, speed & agility, stop spending on data centers, go global in minutes',
+      'IaaS (EC2) vs PaaS (Elastic Beanstalk) vs SaaS (Workmail)',
+      'Know all 3 deployment models: Public, Private, Hybrid',
+      'Cloud value prop: elasticity, agility, scalability, durability, reliability',
+    ],
+  },
+  {
+    domain: 'Security & Compliance',
+    weight: '30%',
+    keyPoints: [
+      'Shared Responsibility: AWS = security OF the cloud; Customer = security IN the cloud',
+      'AWS handles: physical datacenters, hypervisor, managed service OS patches',
+      'Customer handles: EC2 OS patches, app code, IAM users, data encryption decisions',
+      'Principle of least privilege for IAM',
+      'Enable MFA on root account immediately',
+      'Root account: only for billing and initial setup — never use for daily tasks',
+    ],
+  },
+  {
+    domain: 'Cloud Technology & Services',
+    weight: '34%',
+    keyPoints: [
+      'Know the 5 EC2 pricing models and when to use each',
+      'S3 storage classes — Standard vs IA vs Glacier vs Intelligent-Tiering',
+      'RDS Multi-AZ = HA/failover (synchronous). Read Replicas = read performance (async)',
+      'Lambda: serverless, event-driven, max 15 min execution, pay per request',
+      'ELB types: ALB (HTTP/L7), NLB (TCP/L4), CLB (legacy)',
+      'CloudFront = CDN. Route 53 = DNS. VPC = virtual network.',
+    ],
+  },
+  {
+    domain: 'Billing & Pricing',
+    weight: '12%',
+    keyPoints: [
+      '3 pricing fundamentals: compute (per hour/second), storage (per GB), data transfer OUT (free IN)',
+      'AWS Free Tier: 12-month free (EC2 t2.micro 750h, S3 5GB) + always free (Lambda 1M req/mo)',
+      'Cost Explorer = visualize costs. Budgets = alerts. Pricing Calculator = estimate',
+      'Consolidated billing via AWS Organizations — volume discount applies to all accounts',
+      'Support plans: Basic (free) → Developer → Business → Enterprise On-Ramp → Enterprise',
+      'Savings Plans vs Reserved Instances: both commit for 1-3 years, Savings Plans are more flexible',
+    ],
+  },
+]
+
+export const clfServiceComparisons: { title: string; left: string; right: string; leftPoints: string[]; rightPoints: string[]; tip: string }[] = [
+  {
+    title: 'CloudWatch vs CloudTrail',
+    left: 'CloudWatch', right: 'CloudTrail',
+    leftPoints: ['Metrics, logs, alarms', 'CPU, memory, latency', 'Set thresholds & notifications', 'Dashboards'],
+    rightPoints: ['API call logs', 'Who did what, when, where', 'Compliance & auditing', 'Enabled by default 90 days'],
+    tip: 'Watch = WATCH performance. Trail = TRAIL of actions.',
+  },
+  {
+    title: 'SQS vs SNS',
+    left: 'SQS', right: 'SNS',
+    leftPoints: ['Message Queue (pull)', 'Messages stored until processed', 'One consumer per message', 'Decouples services'],
+    rightPoints: ['Pub/Sub (push)', 'Messages sent to all subscribers', 'Many consumers', 'Fan-out pattern'],
+    tip: 'SQS = queue (one receiver). SNS = broadcast (many receivers).',
+  },
+  {
+    title: 'Shield vs WAF',
+    left: 'Shield', right: 'WAF',
+    leftPoints: ['DDoS protection', 'Standard = free, always on', 'Advanced = $3,000/mo + DRT', 'Layer 3/4 attacks'],
+    rightPoints: ['Filter web requests', 'Block SQL injection, XSS', 'Custom rules', 'Works on ALB, CloudFront'],
+    tip: 'Shield = flood of traffic (DDoS). WAF = malicious request content.',
+  },
+  {
+    title: 'RDS Multi-AZ vs Read Replicas',
+    left: 'Multi-AZ', right: 'Read Replicas',
+    leftPoints: ['Disaster recovery', 'Synchronous replication', 'Automatic failover', 'Cannot read from standby'],
+    rightPoints: ['Read performance scaling', 'Asynchronous replication', 'Must manually promote', 'Can be in another region'],
+    tip: 'Multi-AZ = HA/failover. Read Replicas = scale reads.',
+  },
+  {
+    title: 'Direct Connect vs VPN',
+    left: 'Direct Connect', right: 'AWS VPN',
+    leftPoints: ['Dedicated private line', 'Consistent low latency', 'Takes weeks to set up', '1–100 Gbps'],
+    rightPoints: ['Over the public internet', 'Quick to set up (<hour)', 'Variable latency', 'Lower cost'],
+    tip: 'Direct Connect = consistent private fiber. VPN = fast setup over internet.',
+  },
+]
