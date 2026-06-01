@@ -57,10 +57,6 @@ const featureCards = [
 
 export default function HomePage() {
   const { progress } = useProgress()
-  const netplusLast = progress.netplus.lastScore as number | null
-  const netplusBest = progress.netplus.bestScore as number | null
-  const awsLast = progress.aws.lastScore as number | null
-  const awsBest = progress.aws.bestScore as number | null
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -101,12 +97,12 @@ export default function HomePage() {
         {[
           {
             label: 'Network+', code: 'N10-009', tagCls: 'tag-net', borderCls: 'glow-accent',
-            attempts: progress.netplus.attempts as number, last: netplusLast, best: netplusBest,
+            attempts: progress.netplus.attempts as number, last: progress.netplus.lastScore, best: progress.netplus.bestScore,
             pass: 75, barCls: 'bg-accent', icon: 'text-accent',
           },
           {
             label: 'AWS CLF', code: 'CLF-C02', tagCls: 'tag-aws', borderCls: 'glow-aws',
-            attempts: progress.aws.attempts as number, last: awsLast, best: awsBest,
+            attempts: progress.aws.attempts as number, last: progress.aws.lastScore, best: progress.aws.bestScore,
             pass: 72, barCls: 'bg-aws', icon: 'text-aws',
           },
         ].map((stat) => (
@@ -152,7 +148,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {featureCards.map((card) => (
             <Link key={card.href} to={card.href}
-              className={`card flex flex-col gap-3 p-5 border transition-all duration-200 hover:bg-white/[0.02] group ${card.borderCls}`}>
+              className={`card flex flex-col gap-3 p-5 border transition-all duration-200 hover:bg-white/5 group ${card.borderCls}`}>
               <div className="flex items-start justify-between">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${card.iconCls}`}>{card.icon}</div>
                 <span className={card.tagCls}>{card.tag}</span>
@@ -191,7 +187,7 @@ export default function HomePage() {
               <tbody>
                 {osiLayers.map((layer, i) => (
                   <tr key={layer.number}
-                    className={`border-b border-border/40 hover:bg-white/[0.015] transition-colors ${i === osiLayers.length - 1 ? 'border-b-0' : ''}`}>
+                    className={`border-b border-border/40 hover:bg-white/5 transition-colors ${i === osiLayers.length - 1 ? 'border-b-0' : ''}`}>
                     <td className="px-4 py-3">
                       <span className={`font-bold font-mono text-base ${osiLayerColors[layer.number]}`}>{layer.number}</span>
                     </td>
