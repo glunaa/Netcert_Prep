@@ -9,6 +9,7 @@ const links = [
   { to: '/cli', label: 'CLI Ref' },
   { to: '/vpc', label: 'VPC' },
   { to: '/flashcards', label: 'Flashcards' },
+  { to: '/subnet-drill', label: 'Drill' },
 ]
 
 export default function Nav() {
@@ -46,6 +47,16 @@ export default function Nav() {
 
           {/* Desktop CTA buttons */}
           <div className="hidden md:flex items-center gap-2">
+            <NavLink
+              to="/search"
+              className="p-1.5 rounded-lg text-subtle hover:text-slate-200 hover:bg-white/5 transition-colors"
+              aria-label="Search"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="m21 21-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" />
+              </svg>
+            </NavLink>
             <NavLink
               to="/netplus/test"
               className="px-3 py-1.5 text-xs font-medium rounded-lg border border-accent/30 text-accent hover:bg-accent/10 transition-colors"
