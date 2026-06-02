@@ -1,7 +1,10 @@
+import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { useProgress, useStreak } from '../hooks/useTestEngine'
 import { osiLayers } from '../data/referenceData'
 import type { ScoreHistoryEntry } from '../types'
+
+const DailyQuestionSection = lazy(() => import('../components/DailyQuestionSection'))
 
 const osiLayerColors: Record<number, string> = {
   7: 'text-purple-400', 6: 'text-blue-400', 5: 'text-cyan-400',
@@ -152,6 +155,11 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Daily Question */}
+      <Suspense fallback={<div className="h-48 mb-12 rounded-2xl border border-border/40 bg-surface/20 animate-pulse" />}>
+        <DailyQuestionSection />
+      </Suspense>
 
       {/* Stats */}
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">

@@ -11,6 +11,7 @@ const VPCPage = lazy(() => import('./pages/VPCPage'))
 const FlashcardPage = lazy(() => import('./pages/FlashcardPage'))
 const SubnetDrillPage = lazy(() => import('./pages/SubnetDrillPage'))
 const SearchPage = lazy(() => import('./pages/SearchPage'))
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'))
 const NetPlusTestPage = lazy(() =>
   import('./pages/TestPages').then(m => ({ default: m.NetPlusTestPage }))
 )
@@ -44,6 +45,7 @@ export default function App() {
             <Route path="/flashcards" element={<FlashcardPage />} />
             <Route path="/subnet-drill" element={<SubnetDrillPage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
           </Routes>
         </Suspense>
       </div>

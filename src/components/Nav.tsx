@@ -10,6 +10,7 @@ const links = [
   { to: '/vpc', label: 'VPC' },
   { to: '/flashcards', label: 'Flashcards' },
   { to: '/subnet-drill', label: 'Drill' },
+  { to: '/analytics', label: 'Analytics' },
 ]
 
 export default function Nav() {
