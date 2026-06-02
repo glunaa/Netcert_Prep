@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { useProgress } from '../hooks/useTestEngine'
+import { useProgress, useStreak } from '../hooks/useTestEngine'
 import { osiLayers } from '../data/referenceData'
+import type { ScoreHistoryEntry } from '../types'
 
 const osiLayerColors: Record<number, string> = {
   7: 'text-purple-400', 6: 'text-blue-400', 5: 'text-cyan-400',
@@ -12,6 +13,41 @@ function scoreColor(score: number | null): string {
   if (score >= 80) return 'text-success'
   if (score >= 65) return 'text-aws'
   return 'text-danger'
+}
+
+function ScoreChart({ history, passLine }: { history: ScoreHistoryEntry[]; passLine: number }) {
+  if (history.length < 2) {
+    return (
+      <div className="mt-4 flex items-center justify-center h-12 rounded border border-border/40 bg-surface/30">
+        <p className="text-[10px] text-subtle">Complete 2+ tests to see chart</p>
+      </div>
+    )
+  }
+  const W = 260, H = 52, PAD = 8
+  const iW = W - PAD * 2
+  const iH = H - PAD * 2
+  const pts = history.map((h, i) => ({
+    x: PAD + (history.length === 1 ? iW / 2 : (i / (history.length - 1)) * iW),
+    y: PAD + (1 - h.score / 100) * iH,
+    score: h.score,
+  }))
+  const passY = PAD + (1 - passLine / 100) * iH
+  const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ')
+  const last = pts[pts.length - 1]
+  const dotColor = last.score >= passLine ? '#22c55e' : '#ef4444'
+  return (
+    <div className="mt-4">
+      <p className="text-[10px] text-subtle mb-1">Score history ({history.length} attempt{history.length !== 1 ? 's' : ''})</p>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 52 }}>
+        <line x1={PAD} y1={passY} x2={W - PAD} y2={passY}
+          stroke="rgba(255,255,255,0.12)" strokeWidth="1" strokeDasharray="4 3" />
+        <text x={W - PAD + 3} y={passY + 3.5} fontSize="7" fill="rgba(255,255,255,0.25)">pass</text>
+        <path d={d} fill="none" stroke="rgba(0,212,255,0.55)" strokeWidth="1.5"
+          strokeLinejoin="round" strokeLinecap="round" />
+        <circle cx={last.x} cy={last.y} r="3" fill={dotColor} />
+      </svg>
+    </div>
+  )
 }
 
 const featureCards = [
@@ -53,14 +89,35 @@ const featureCards = [
     href: '/aws/test', tag: 'EXAM', tagCls: 'tag-aws', borderCls: 'border-aws/20 hover:border-aws/50', iconCls: 'bg-aws/10 text-aws',
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V18Z" /></svg>,
   },
+  {
+    title: 'Flashcards', description: 'Flip-card drills for ports, OSI layers, AWS services, attacks, and more.',
+    href: '/flashcards', tag: 'STUDY', tagCls: 'tag bg-violet-500/10 text-violet-400 border border-violet-500/20',
+    borderCls: 'border-violet-500/20 hover:border-violet-500/50', iconCls: 'bg-violet-500/10 text-violet-400',
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>,
+  },
+  {
+    title: 'Subnet Drill', description: 'Practice network/broadcast address, usable hosts, and subnet masks.',
+    href: '/subnet-drill', tag: 'DRILL', tagCls: 'tag bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    borderCls: 'border-emerald-500/20 hover:border-emerald-500/50', iconCls: 'bg-emerald-500/10 text-emerald-400',
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" /></svg>,
+  },
+  {
+    title: 'Search Reference', description: 'Instantly search ports, OSI layers, AWS services, attacks, and protocols.',
+    href: '/search', tag: 'TOOL', tagCls: 'tag bg-pink-500/10 text-pink-400 border border-pink-500/20',
+    borderCls: 'border-pink-500/20 hover:border-pink-500/50', iconCls: 'bg-pink-500/10 text-pink-400',
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>,
+  },
 ]
 
 export default function HomePage() {
   const { progress } = useProgress()
+  const { streak } = useStreak()
   const netplusLast = progress.netplus.lastScore as number | null
   const netplusBest = progress.netplus.bestScore as number | null
   const awsLast = progress.aws.lastScore as number | null
   const awsBest = progress.aws.bestScore as number | null
+  const streakPct = streak.dailyGoal > 0 ? Math.min((streak.todayCount / streak.dailyGoal) * 100, 100) : 0
+  const goalMet = streak.todayCount >= streak.dailyGoal && streak.dailyGoal > 0
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -103,11 +160,13 @@ export default function HomePage() {
             label: 'Network+', code: 'N10-009', tagCls: 'tag-net', borderCls: 'glow-accent',
             attempts: progress.netplus.attempts as number, last: netplusLast, best: netplusBest,
             pass: 75, barCls: 'bg-accent', icon: 'text-accent',
+            history: progress.netplus.history,
           },
           {
             label: 'AWS CLF', code: 'CLF-C02', tagCls: 'tag-aws', borderCls: 'glow-aws',
             attempts: progress.aws.attempts as number, last: awsLast, best: awsBest,
             pass: 72, barCls: 'bg-aws', icon: 'text-aws',
+            history: progress.aws.history,
           },
         ].map((stat) => (
           <div key={stat.code} className={`card p-6 ${stat.borderCls}`}>
@@ -139,8 +198,56 @@ export default function HomePage() {
                 <div className={`progress-fill ${stat.barCls}`} style={{ width: `${stat.best !== null ? Math.min(stat.best, 100) : 0}%` }} />
               </div>
             </div>
+            <ScoreChart history={stat.history} passLine={stat.pass} />
           </div>
         ))}
+      </section>
+
+      {/* Streak */}
+      <section className="mb-12">
+        <div className="card p-5 border border-orange-500/20">
+          <div className="flex flex-wrap items-center gap-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-orange-400">
+                  <path d="M12 2C12 2 7 8.5 7 13a5 5 0 0 0 10 0c0-3.5-2-7-5-11ZM8.5 15a3.5 3.5 0 0 0 3.5 3.5V15c-.8 0-1.5-.7-1.5-1.5 0-.6.2-1.2.5-1.8-.9.9-2.5 2-2.5 3.3Z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-[10px] text-subtle font-mono tracking-widest uppercase">Study Streak</p>
+                <p className="text-sm font-semibold text-slate-200">Daily Progress</p>
+              </div>
+              {goalMet && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-success/10 text-success border border-success/20 font-medium">
+                  Goal Met!
+                </span>
+              )}
+            </div>
+            <div className="flex gap-6">
+              <div>
+                <p className="text-[10px] text-subtle uppercase tracking-wider mb-0.5">Current</p>
+                <p className="text-xl font-bold font-mono text-orange-400">{streak.current}d</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-subtle uppercase tracking-wider mb-0.5">Longest</p>
+                <p className="text-xl font-bold font-mono text-slate-200">{streak.longest}d</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-subtle uppercase tracking-wider mb-0.5">Today</p>
+                <p className="text-xl font-bold font-mono text-slate-200">{streak.todayCount}/{streak.dailyGoal}</p>
+              </div>
+            </div>
+            <div className="flex-1 min-w-40">
+              <div className="flex justify-between text-[10px] text-subtle mb-1.5">
+                <span>Daily goal: {streak.dailyGoal} questions</span>
+                <span>{Math.round(streakPct)}%</span>
+              </div>
+              <div className="progress-track">
+                <div className="progress-fill bg-orange-400 transition-all" style={{ width: `${streakPct}%` }} />
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Feature Cards */}
