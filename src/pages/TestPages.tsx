@@ -191,8 +191,8 @@ function ConfigScreen({ label, code, tagCls, accentCls, accentText, weakCount, b
         {/* Count */}
         <div>
           <label className="block text-sm font-semibold text-slate-300 mb-3">Questions</label>
-          <div className="grid grid-cols-3 gap-3">
-            {[10, 20, 30].map(n => (
+          <div className="grid grid-cols-6 gap-2">
+            {[10, 20, 30, 50, 75, 150].map(n => (
               <button key={n} onClick={() => setCount(n)}
                 className={`py-3 rounded-xl font-bold text-sm transition-all border ${count === n ? `${accentCls} border-transparent` : 'border-border text-subtle hover:border-slate-500 hover:text-slate-200'}`}>
                 {n}
