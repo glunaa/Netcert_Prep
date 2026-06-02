@@ -8,11 +8,9 @@ import CLIPage from './pages/CLIPage'
 import VPCPage from './pages/VPCPage'
 import { NetPlusTestPage, AWSTestPage } from './pages/TestPages'
 
-const basename = import.meta.env.PROD ? '/Netcert_Prep' : '/'
-
 export default function App() {
   return (
-    <BrowserRouter basename={basename}>
+    <BrowserRouter>
       <div className="min-h-screen">
         <Nav />
         <Routes>
