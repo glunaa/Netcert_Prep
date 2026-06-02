@@ -8,6 +8,7 @@ const links = [
   { to: '/vlsm', label: 'VLSM' },
   { to: '/cli', label: 'CLI Ref' },
   { to: '/vpc', label: 'VPC' },
+  { to: '/flashcards', label: 'Flashcards' },
 ]
 
 export default function Nav() {

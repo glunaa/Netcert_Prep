@@ -5,22 +5,22 @@ function pickRandom(arr: Question[], count: number): Question[] {
   return [...arr].sort(() => Math.random() - 0.5).slice(0, count)
 }
 
-export function useTestEngine(questions: Question[]) {
-  const [shuffled, setShuffled] = useState<Question[]>(() => pickRandom(questions, 30))
+export function useTestEngine(questions: Question[], initialCount = 30) {
+  const [shuffled, setShuffled] = useState<Question[]>(() => pickRandom(questions, initialCount))
   const [current, setCurrent] = useState(0)
   const [answered, setAnswered] = useState(false)
   const [selected, setSelected] = useState<number | null>(null)
   const [results, setResults] = useState<TestResult[]>([])
   const [finished, setFinished] = useState(false)
 
-  const start = useCallback((count = 30) => {
+  const start = useCallback((count = initialCount) => {
     setShuffled(pickRandom(questions, count))
     setCurrent(0)
     setAnswered(false)
     setSelected(null)
     setResults([])
     setFinished(false)
-  }, [questions])
+  }, [questions, initialCount])
 
   const selectAnswer = useCallback((idx: number) => {
     if (answered) return
@@ -53,13 +53,27 @@ export function useTestEngine(questions: Question[]) {
     next()
   }, [shuffled, current, next])
 
+  const forceFinish = useCallback(() => {
+    setResults(prev => {
+      const answeredIds = new Set(prev.map(r => r.questionId))
+      const remaining = shuffled.slice(current).filter(q => !answeredIds.has(q.id))
+      const expired = remaining.map(q => ({
+        questionId: q.id, question: q.q, correct: false,
+        yourAnswer: 'Time expired', correctAnswer: q.options[q.answer],
+        explanation: q.explanation, domain: q.domain,
+      }))
+      return [...prev, ...expired]
+    })
+    setFinished(true)
+  }, [shuffled, current])
+
   return {
     currentQuestion: shuffled[current],
     current, total: shuffled.length,
     answered, selected, results, finished,
     score: results.filter(r => r.correct).length,
     progress: shuffled.length > 0 ? (current / shuffled.length) * 100 : 0,
-    selectAnswer, next, skip, restart: start,
+    selectAnswer, next, skip, restart: start, forceFinish,
   }
 }
 
