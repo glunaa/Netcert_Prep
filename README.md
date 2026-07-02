@@ -11,7 +11,6 @@ It serves as a centralized study platform for core networking topics and certifi
 🌐 Deployed on Netlify:  
 https://netcertprep.netlify.app
 
-> Replace the URL above with your actual Netlify deployment link.
 
 ---
 

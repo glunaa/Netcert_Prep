@@ -1,8 +1,15 @@
 import { useState, useCallback } from 'react'
 import type { Question, TestResult } from '../types'
 
+// Fisher–Yates shuffle: unbiased, unlike sort(() => Math.random() - 0.5),
+// which produces uneven orderings because the comparator isn't consistent.
 function pickRandom(arr: Question[], count: number): Question[] {
-  return [...arr].sort(() => Math.random() - 0.5).slice(0, count)
+  const copy = [...arr]
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy.slice(0, count)
 }
 
 export function useTestEngine(questions: Question[]) {

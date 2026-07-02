@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Nav from './components/Nav'
+import GridPackets from './components/GridPackets'
+import { useSpotlight } from './hooks/useSpotlight'
 import HomePage from './pages/HomePage'
 import NetPlusPage from './pages/NetPlusPage'
 import AWSPage from './pages/AWSPage'
@@ -11,9 +13,11 @@ import { NetPlusTestPage, AWSTestPage } from './pages/TestPages'
 const basename = import.meta.env.PROD ? '/Netcert_Prep' : '/'
 
 export default function App() {
+  useSpotlight()
   return (
     <BrowserRouter basename={basename}>
       <div className="min-h-screen">
+        <GridPackets />
         <Nav />
         <Routes>
           <Route path="/" element={<HomePage />} />
