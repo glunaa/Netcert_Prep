@@ -1,36 +1,36 @@
-import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Nav from './components/Nav'
-import GridPackets from './components/GridPackets'
-import { useSpotlight } from './hooks/useSpotlight'
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Nav from './components/Nav';
+import GridPackets from './components/GridPackets';
+import { useSpotlight } from './hooks/useSpotlight';
 
-const HomePage = lazy(() => import('./pages/HomePage'))
-const NetPlusPage = lazy(() => import('./pages/NetPlusPage'))
-const AWSPage = lazy(() => import('./pages/AWSPage'))
-const VLSMPage = lazy(() => import('./pages/VLSMPage'))
-const CLIPage = lazy(() => import('./pages/CLIPage'))
-const VPCPage = lazy(() => import('./pages/VPCPage'))
-const FlashcardPage = lazy(() => import('./pages/FlashcardPage'))
-const SubnetDrillPage = lazy(() => import('./pages/SubnetDrillPage'))
-const SearchPage = lazy(() => import('./pages/SearchPage'))
-const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'))
+const HomePage = lazy(() => import('./pages/HomePage'));
+const NetPlusPage = lazy(() => import('./pages/NetPlusPage'));
+const AWSPage = lazy(() => import('./pages/AWSPage'));
+const VLSMPage = lazy(() => import('./pages/VLSMPage'));
+const CLIPage = lazy(() => import('./pages/CLIPage'));
+const VPCPage = lazy(() => import('./pages/VPCPage'));
+const FlashcardPage = lazy(() => import('./pages/FlashcardPage'));
+const SubnetDrillPage = lazy(() => import('./pages/SubnetDrillPage'));
+const SearchPage = lazy(() => import('./pages/SearchPage'));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 const NetPlusTestPage = lazy(() =>
-  import('./pages/TestPages').then(m => ({ default: m.NetPlusTestPage }))
-)
+  import('./pages/TestPages').then((m) => ({ default: m.NetPlusTestPage })),
+);
 const AWSTestPage = lazy(() =>
-  import('./pages/TestPages').then(m => ({ default: m.AWSTestPage }))
-)
+  import('./pages/TestPages').then((m) => ({ default: m.AWSTestPage })),
+);
 
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-[40vh]">
       <div className="w-6 h-6 rounded-full border-2 border-accent border-t-transparent animate-spin" />
     </div>
-  )
+  );
 }
 
 export default function App() {
-  useSpotlight()
+  useSpotlight();
 
   return (
     <BrowserRouter>
@@ -55,5 +55,5 @@ export default function App() {
         </Suspense>
       </div>
     </BrowserRouter>
-  )
+  );
 }
