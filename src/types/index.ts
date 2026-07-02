@@ -1,4 +1,6 @@
 export type ExamType = 'netplus' | 'aws'
+export interface WeakSpotEntry { wrong: number; seen: number }
+export interface ScoreHistoryEntry { score: number; date: string }
 export interface Question {
   id: number; q: string; options: [string, string, string, string]; answer: 0 | 1 | 2 | 3; explanation: string; domain: string
 }
