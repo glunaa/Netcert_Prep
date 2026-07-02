@@ -1,19 +1,19 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Nav from './components/Nav'
-import GridPackets from './components/GridPackets'
-import { useSpotlight } from './hooks/useSpotlight'
-import HomePage from './pages/HomePage'
-import NetPlusPage from './pages/NetPlusPage'
-import AWSPage from './pages/AWSPage'
-import VLSMPage from './pages/VLSMPage'
-import CLIPage from './pages/CLIPage'
-import VPCPage from './pages/VPCPage'
-import { NetPlusTestPage, AWSTestPage } from './pages/TestPages'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Nav from './components/Nav';
+import GridPackets from './components/GridPackets';
+import { useSpotlight } from './hooks/useSpotlight';
+import HomePage from './pages/HomePage';
+import NetPlusPage from './pages/NetPlusPage';
+import AWSPage from './pages/AWSPage';
+import VLSMPage from './pages/VLSMPage';
+import CLIPage from './pages/CLIPage';
+import VPCPage from './pages/VPCPage';
+import { NetPlusTestPage, AWSTestPage } from './pages/TestPages';
 
-const basename = import.meta.env.PROD ? '/Netcert_Prep' : '/'
+const basename = import.meta.env.PROD ? '/Netcert_Prep' : '/';
 
 export default function App() {
-  useSpotlight()
+  useSpotlight();
   return (
     <BrowserRouter basename={basename}>
       <div className="min-h-screen">
@@ -31,5 +31,5 @@ export default function App() {
         </Routes>
       </div>
     </BrowserRouter>
-  )
+  );
 }

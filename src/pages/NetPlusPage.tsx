@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
   osiLayers,
@@ -175,43 +175,27 @@ const tabs: { id: Tab; label: string }[] = [
 
 const attackCategories = [...new Set(attackTypes.map((a) => a.category))];
 
-export default function NetPlusPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('osi');
-  const [portSearch, setPortSearch] = useState('');
-  const [attackFilter, setAttackFilter] = useState('All');
+type SectionHeaderProps = {
+  title: string;
+  color?: string;
+};
 
-  const filteredPorts = portEntries.filter(
-    (p) =>
-      p.port.includes(portSearch) ||
-      p.service.toLowerCase().includes(portSearch.toLowerCase()) ||
-      p.description.toLowerCase().includes(portSearch.toLowerCase()),
-  );
-
-  const filteredAttacks =
-    attackFilter === 'All'
-      ? attackTypes
-      : attackTypes.filter((a) => a.category === attackFilter);
-
-  const SectionHeader = ({
-    title,
-    color = 'accent',
-  }: {
-    title: string;
-    color?: string;
-  }) => (
+function SectionHeader({ title, color = 'accent' }: SectionHeaderProps) {
+  return (
     <h2 className="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
       <span className={`w-1 h-5 rounded-full inline-block bg-${color}`} />
       {title}
     </h2>
   );
+}
 
-  const Table = ({
-    heads,
-    children,
-  }: {
-    heads: string[];
-    children: React.ReactNode;
-  }) => (
+type TableProps = {
+  heads: string[];
+  children: ReactNode;
+};
+
+function Table({ heads, children }: TableProps) {
+  return (
     <div className="card overflow-hidden mb-6">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -232,14 +216,15 @@ export default function NetPlusPage() {
       </div>
     </div>
   );
+}
 
-  const Tr = ({
-    cells,
-    highlight,
-  }: {
-    cells: React.ReactNode[];
-    highlight?: boolean;
-  }) => (
+type TrProps = {
+  cells: ReactNode[];
+  highlight?: boolean;
+};
+
+function Tr({ cells, highlight }: TrProps) {
+  return (
     <tr
       className={`border-b border-border/40 last:border-b-0 hover:bg-white/5 transition-colors ${highlight ? 'bg-accent/5' : ''}`}
     >
@@ -250,6 +235,24 @@ export default function NetPlusPage() {
       ))}
     </tr>
   );
+}
+
+export default function NetPlusPage() {
+  const [activeTab, setActiveTab] = useState<Tab>('osi');
+  const [portSearch, setPortSearch] = useState('');
+  const [attackFilter, setAttackFilter] = useState('All');
+
+  const filteredPorts = portEntries.filter(
+    (p) =>
+      p.port.includes(portSearch) ||
+      p.service.toLowerCase().includes(portSearch.toLowerCase()) ||
+      p.description.toLowerCase().includes(portSearch.toLowerCase()),
+  );
+
+  const filteredAttacks =
+    attackFilter === 'All'
+      ? attackTypes
+      : attackTypes.filter((a) => a.category === attackFilter);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -444,7 +447,7 @@ export default function NetPlusPage() {
               <div className="space-y-3">
                 {tcpHandshake.map((step) => (
                   <div key={step.step} className="flex items-start gap-4">
-                    <span className="w-7 h-7 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center text-accent font-bold text-xs flex-shrink-0">
+                    <span className="w-7 h-7 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center text-accent font-bold text-xs shrink-0">
                       {step.step}
                     </span>
                     <div>
@@ -720,7 +723,7 @@ export default function NetPlusPage() {
                   key={i}
                   className="flex items-start gap-3 text-xs text-subtle"
                 >
-                  <span className="text-accent font-mono font-bold flex-shrink-0">
+                  <span className="text-accent font-mono font-bold shrink-0">
                     {i + 1}.
                   </span>
                   {step}
@@ -838,7 +841,7 @@ export default function NetPlusPage() {
                 },
               ].map((item) => (
                 <div key={item.item} className="flex gap-3">
-                  <span className="text-accent font-mono text-xs mt-0.5 flex-shrink-0">
+                  <span className="text-accent font-mono text-xs mt-0.5 shrink-0">
                     →
                   </span>
                   <div>
@@ -1252,7 +1255,7 @@ export default function NetPlusPage() {
             <div className="space-y-3 mb-6">
               {troubleshootingSteps.map((s) => (
                 <div key={s.step} className="card p-4 flex gap-4">
-                  <div className="w-8 h-8 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center text-accent font-bold text-sm flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center text-accent font-bold text-sm shrink-0">
                     {s.step}
                   </div>
                   <div>
@@ -1663,7 +1666,7 @@ export default function NetPlusPage() {
                     key={fact.label}
                     className="flex items-start justify-between gap-3"
                   >
-                    <span className="text-xs text-subtle flex-shrink-0">
+                    <span className="text-xs text-subtle shrink-0">
                       {fact.label}
                     </span>
                     <span className="text-xs font-mono text-slate-300 text-right">
