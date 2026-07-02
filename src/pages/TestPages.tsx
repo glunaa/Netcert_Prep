@@ -23,7 +23,7 @@ interface StartConfig {
 
 function optionClass(idx: number, selected: number | null, answered: boolean, correct: number): string {
   const base = 'w-full text-left px-4 py-3.5 rounded-xl border text-sm font-medium transition-all duration-150 flex items-start gap-3'
-  if (!answered) return `${base} border-border bg-surface hover:bg-white/[0.04] hover:border-slate-500 text-slate-200 cursor-pointer`
+  if (!answered) return `${base} border-border bg-surface hover:bg-white/4 hover:border-slate-500 text-slate-200 cursor-pointer`
   if (idx === correct) return `${base} border-success bg-success/10 text-success cursor-default`
   if (idx === selected && idx !== correct) return `${base} border-danger bg-danger/10 text-danger cursor-default`
   return `${base} border-border/50 bg-surface/50 text-subtle cursor-default`
@@ -31,10 +31,10 @@ function optionClass(idx: number, selected: number | null, answered: boolean, co
 
 function OptionIcon({ idx, selected, answered, correct }: { idx: number; selected: number | null; answered: boolean; correct: number }) {
   const letters = ['A', 'B', 'C', 'D']
-  if (!answered) return <span className="w-6 h-6 rounded-full border border-border flex items-center justify-center text-xs font-mono text-subtle flex-shrink-0 mt-0.5">{letters[idx]}</span>
-  if (idx === correct) return <span className="w-6 h-6 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg className="w-3.5 h-3.5 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg></span>
-  if (idx === selected) return <span className="w-6 h-6 rounded-full bg-danger/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg className="w-3.5 h-3.5 text-danger" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg></span>
-  return <span className="w-6 h-6 rounded-full border border-border/40 flex items-center justify-center text-xs font-mono text-subtle/50 flex-shrink-0 mt-0.5">{letters[idx]}</span>
+  if (!answered) return <span className="w-6 h-6 rounded-full border border-border flex items-center justify-center text-xs font-mono text-subtle shrink-0 mt-0.5">{letters[idx]}</span>
+  if (idx === correct) return <span className="w-6 h-6 rounded-full bg-success/20 flex items-center justify-center shrink-0 mt-0.5"><svg className="w-3.5 h-3.5 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg></span>
+  if (idx === selected) return <span className="w-6 h-6 rounded-full bg-danger/20 flex items-center justify-center shrink-0 mt-0.5"><svg className="w-3.5 h-3.5 text-danger" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg></span>
+  return <span className="w-6 h-6 rounded-full border border-border/40 flex items-center justify-center text-xs font-mono text-subtle/50 shrink-0 mt-0.5">{letters[idx]}</span>
 }
 
 // ── Results helpers ───────────────────────────────────────────────────────────
@@ -72,7 +72,7 @@ function ReviewWrongAnswers({ results }: { results: TestResult[] }) {
   if (wrong.length === 0) return <div className="card p-5 border-success/20"><p className="text-success text-sm font-semibold text-center">Perfect score — no wrong answers!</p></div>
   return (
     <div className="card overflow-hidden">
-      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition-colors">
+      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/2 transition-colors">
         <h3 className="text-sm font-semibold text-slate-200">Review Wrong Answers ({wrong.length})</h3>
         <svg className={`w-4 h-4 text-subtle transition-transform duration-200 ${open ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
       </button>
@@ -82,8 +82,8 @@ function ReviewWrongAnswers({ results }: { results: TestResult[] }) {
             <div key={r.questionId} className="p-5">
               <p className="text-sm text-slate-200 mb-3 leading-relaxed">{r.question}</p>
               <div className="space-y-1.5 mb-3">
-                <div className="flex items-start gap-2 text-xs"><span className="text-danger flex-shrink-0 font-semibold">Your answer:</span><span className="text-danger">{r.yourAnswer}</span></div>
-                <div className="flex items-start gap-2 text-xs"><span className="text-success flex-shrink-0 font-semibold">Correct answer:</span><span className="text-success">{r.correctAnswer}</span></div>
+                <div className="flex items-start gap-2 text-xs"><span className="text-danger shrink-0 font-semibold">Your answer:</span><span className="text-danger">{r.yourAnswer}</span></div>
+                <div className="flex items-start gap-2 text-xs"><span className="text-success shrink-0 font-semibold">Correct answer:</span><span className="text-success">{r.correctAnswer}</span></div>
               </div>
               <div className="bg-surface rounded-lg p-3 border border-border/50">
                 <p className="text-xs text-subtle leading-relaxed"><span className="text-accent font-semibold">Explanation: </span>{r.explanation}</p>
@@ -246,18 +246,18 @@ function ActiveTest(props: TestPageProps & {
   const engine = useTestEngine(questions, count)
   const { recordScore } = useProgress()
   const { updateStreak } = useStreak()
-  const [scored, setScored] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number | null>(timerSeconds)
   const forceFinishRef = useRef(engine.forceFinish)
   useEffect(() => { forceFinishRef.current = engine.forceFinish }, [engine.forceFinish])
+  const scoredRef = useRef(false)
 
   useEffect(() => {
-    if (engine.finished && !scored) {
+    if (engine.finished && !scoredRef.current) {
+      scoredRef.current = true
       recordScore(examKey, engine.score, engine.total, engine.results)
       updateStreak(engine.total)
-      setScored(true)
     }
-  }, [engine.finished, scored, recordScore, updateStreak, examKey, engine.score, engine.total, engine.results])
+  }, [engine.finished, recordScore, updateStreak, examKey, engine.score, engine.total, engine.results])
 
   useEffect(() => {
     if (timerSeconds === null) return
@@ -356,7 +356,7 @@ function ActiveTest(props: TestPageProps & {
       {engine.answered && (
         <div className={`card p-4 mb-5 border ${engine.selected === q.answer ? 'border-success/30 bg-success/5' : 'border-accent/20 bg-accent/5'}`}>
           <div className="flex items-start gap-2">
-            <svg className={`w-4 h-4 flex-shrink-0 mt-0.5 ${engine.selected === q.answer ? 'text-success' : 'text-accent'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
+            <svg className={`w-4 h-4 shrink-0 mt-0.5 ${engine.selected === q.answer ? 'text-success' : 'text-accent'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
             <p className="text-sm text-slate-300 leading-relaxed">{q.explanation}</p>
           </div>
         </div>

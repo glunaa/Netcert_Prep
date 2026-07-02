@@ -267,7 +267,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {featureCards.map((card) => (
             <Link key={card.href} to={card.href}
-              className={`card flex flex-col gap-3 p-5 border transition-all duration-200 hover:bg-white/[0.02] group ${card.borderCls}`}>
+              className={`card flex flex-col gap-3 p-5 border transition-all duration-200 hover:bg-white/2 group ${card.borderCls}`}>
               <div className="flex items-start justify-between">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${card.iconCls}`}>{card.icon}</div>
                 <span className={card.tagCls}>{card.tag}</span>

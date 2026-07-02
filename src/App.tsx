@@ -1,6 +1,8 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Nav from './components/Nav'
+import GridPackets from './components/GridPackets'
+import { useSpotlight } from './hooks/useSpotlight'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
 const NetPlusPage = lazy(() => import('./pages/NetPlusPage'))
@@ -28,9 +30,12 @@ function PageLoader() {
 }
 
 export default function App() {
+  useSpotlight()
+
   return (
     <BrowserRouter>
       <div className="min-h-screen">
+        <GridPackets />
         <Nav />
         <Suspense fallback={<PageLoader />}>
           <Routes>
