@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react'
 import { portEntries, osiLayers, awsServicesSummary } from '../data/referenceData'
-import { attackTypes, vpnProtocols } from '../data/netplusData'
+import {
+  attackTypes, vpnProtocols, dnsRecordTypes, natTerminology,
+  stpFeatures, sdnConcepts, netconfYang, ipv6AddressTypes,
+} from '../data/netplusData'
 
 interface SearchResult {
   id: string
@@ -68,13 +71,76 @@ function buildIndex(): SearchResult[] {
     })
   })
 
+  dnsRecordTypes.forEach(r => {
+    results.push({
+      id: `dns-${r.type}`,
+      category: 'DNS',
+      categoryColor: 'text-cyan-400 border-cyan-400/30 bg-cyan-400/5',
+      title: `${r.type} record`,
+      detail: r.description,
+      meta: r.example,
+    })
+  })
+
+  ipv6AddressTypes.forEach(t => {
+    results.push({
+      id: `ipv6-${t.type}`,
+      category: 'IPv6',
+      categoryColor: 'text-blue-400 border-blue-400/30 bg-blue-400/5',
+      title: `IPv6 ${t.type}`,
+      detail: t.desc,
+      meta: `${t.prefix} · IPv4 equivalent: ${t.equiv}`,
+    })
+  })
+
+  natTerminology.forEach(t => {
+    results.push({
+      id: `nat-${t.term}`,
+      category: 'Routing',
+      categoryColor: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5',
+      title: `NAT: ${t.term}`,
+      detail: t.def,
+    })
+  })
+
+  stpFeatures.forEach(f => {
+    results.push({
+      id: `stp-${f.feature}`,
+      category: 'Routing',
+      categoryColor: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5',
+      title: `STP: ${f.feature}`,
+      detail: f.desc,
+      meta: f.cmd,
+    })
+  })
+
+  sdnConcepts.forEach(c => {
+    results.push({
+      id: `sdn-${c.concept}`,
+      category: 'Automation',
+      categoryColor: 'text-violet-400 border-violet-400/30 bg-violet-400/5',
+      title: c.concept,
+      detail: c.desc,
+    })
+  })
+
+  netconfYang.forEach(p => {
+    results.push({
+      id: `proto-${p.item}`,
+      category: 'Automation',
+      categoryColor: 'text-violet-400 border-violet-400/30 bg-violet-400/5',
+      title: p.item,
+      detail: p.desc,
+    })
+  })
+
   return results
 }
 
 const INDEX = buildIndex()
 
 const CATEGORY_FILTERS = [
-  'All', 'Port', 'OSI', 'Security', 'VPN',
+  'All', 'Port', 'OSI', 'Security', 'VPN', 'DNS', 'IPv6', 'Routing', 'Automation',
   'Compute', 'Storage', 'Database', 'Networking', 'Monitoring', 'Messaging', 'DevOps',
 ]
 

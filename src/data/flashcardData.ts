@@ -1,5 +1,9 @@
 import { portEntries, osiLayers } from './referenceData'
-import { wirelessStandards, wirelessSecurity, attackTypes, routingProtocols, vpnProtocols } from './netplusData'
+import {
+  wirelessStandards, wirelessSecurity, attackTypes, routingProtocols, vpnProtocols,
+  dnsRecordTypes, ipv6AddressTypes, ndpMessages, eui64Desc,
+  natTerminology, aclTypes, stpFeatures, sdnConcepts, netconfYang,
+} from './netplusData'
 import { coreServicesOverview, wellArchPillars, ec2PricingSimple, iamBasics, infraConcepts, clfScenarioTips, clfCommonGotchas } from './awsData'
 
 export interface Flashcard {
@@ -147,6 +151,76 @@ const netplusMiscCards: Flashcard[] = [
   },
 ]
 
+const dnsRecordCards: Flashcard[] = dnsRecordTypes.map(r => ({
+  id: uid(),
+  front: `DNS Record: ${r.type}`,
+  back: `${r.description}\n\nExample: ${r.example}`,
+  category: 'dns',
+}))
+
+const ipv6TypeCards: Flashcard[] = ipv6AddressTypes.map(t => ({
+  id: uid(),
+  front: `IPv6: ${t.type}`,
+  back: `Prefix: ${t.prefix}\nIPv4 equivalent: ${t.equiv}\n\n${t.desc}`,
+  category: 'ipv6',
+}))
+
+const ndpCards: Flashcard[] = ndpMessages.map(m => ({
+  id: uid(),
+  front: `NDP: ${m.type}`,
+  back: `${m.icmpv6} → ${m.dst}\n\n${m.desc}`,
+  category: 'ipv6',
+}))
+
+const eui64Card: Flashcard = {
+  id: uid(),
+  front: 'How does EUI-64 work?',
+  back: eui64Desc,
+  category: 'ipv6',
+}
+
+const natTermCards: Flashcard[] = natTerminology.map(t => ({
+  id: uid(),
+  front: `NAT: ${t.term}`,
+  back: t.def,
+  category: 'cisco',
+}))
+
+const aclCards: Flashcard[] = aclTypes.map(a => ({
+  id: uid(),
+  front: a.type,
+  back: `Numbers: ${a.numbers}\nMatches: ${a.matches}\nPlacement: ${a.placement}\n\n${a.placementReason}`,
+  category: 'cisco',
+}))
+
+const stpFeatureCards: Flashcard[] = stpFeatures.map(f => ({
+  id: uid(),
+  front: `STP: ${f.feature}`,
+  back: `${f.desc}\n\nCommand: ${f.cmd}`,
+  category: 'cisco',
+}))
+
+const wildcardCard: Flashcard = {
+  id: uid(),
+  front: 'Wildcard mask shortcut',
+  back: 'Wildcard = 255.255.255.255 − subnet mask.\n\n/24 → 0.0.0.255\n/26 → 0.0.0.63\n/30 → 0.0.0.3\nhost → 0.0.0.0\nany → 255.255.255.255\n\nWildcard bit 1 = ignore, bit 0 = must match.',
+  category: 'cisco',
+}
+
+const sdnCards: Flashcard[] = sdnConcepts.map(c => ({
+  id: uid(),
+  front: `SDN: ${c.concept}`,
+  back: c.desc,
+  category: 'automation',
+}))
+
+const netconfCards: Flashcard[] = netconfYang.map(p => ({
+  id: uid(),
+  front: p.item,
+  back: p.desc,
+  category: 'automation',
+}))
+
 // ── AWS ───────────────────────────────────────────────────────────────────────
 
 const awsServiceCards: Flashcard[] = coreServicesOverview.map(s => ({
@@ -213,6 +287,10 @@ export const flashcardDecks: FlashcardDeck[] = [
       { id: 'wireless', label: 'Wireless' },
       { id: 'attacks', label: 'Attacks' },
       { id: 'concepts', label: 'Concepts' },
+      { id: 'dns', label: 'DNS Records' },
+      { id: 'ipv6', label: 'IPv6' },
+      { id: 'cisco', label: 'NAT / ACL / STP' },
+      { id: 'automation', label: 'Automation' },
     ],
     cards: [
       ...portCards,
@@ -223,6 +301,16 @@ export const flashcardDecks: FlashcardDeck[] = [
       ...routingCards,
       ...vpnCards,
       ...netplusMiscCards,
+      ...dnsRecordCards,
+      ...ipv6TypeCards,
+      ...ndpCards,
+      eui64Card,
+      ...natTermCards,
+      ...aclCards,
+      ...stpFeatureCards,
+      wildcardCard,
+      ...sdnCards,
+      ...netconfCards,
     ],
   },
   {

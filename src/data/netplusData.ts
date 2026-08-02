@@ -488,3 +488,182 @@ export const dhcpRelayFacts = [
   'The DHCP server must have scopes matching each subnet\'s range to respond correctly',
   'ip helper-address forwards 8 UDP services by default (DHCP, DNS, TFTP, BOOTP, Time, etc.)',
 ]
+
+// ─── NAT / PAT (extended) ────────────────────────────────────────────────────
+
+export const natTerminology = [
+  { term: 'Inside Local', def: 'Private IP address of an inside host (before NAT). Usually RFC 1918 space.' },
+  { term: 'Inside Global', def: 'Public IP representing an inside host to the outside world (after NAT translation).' },
+  { term: 'Outside Local', def: 'IP address of an external host as seen from inside the network.' },
+  { term: 'Outside Global', def: 'Actual IP address of an external host as seen from outside.' },
+  { term: 'NAT Table', def: 'Translation table maintained by the router mapping Inside Local:Port ↔ Inside Global:Port.' },
+]
+
+export const natConfig = [
+  { step: 1, action: 'Define inside/outside interfaces', cmd: 'interface Gi0/0\n ip nat inside\ninterface Gi0/1\n ip nat outside' },
+  { step: 2, action: 'Create ACL identifying inside hosts', cmd: 'access-list 1 permit 192.168.1.0 0.0.0.255' },
+  { step: 3, action: 'Configure PAT overload', cmd: 'ip nat inside source list 1 interface Gi0/1 overload' },
+  { step: 4, action: 'Verify translations', cmd: 'show ip nat translations\nshow ip nat statistics\ndebug ip nat' },
+]
+
+// ─── ACLs ────────────────────────────────────────────────────────────────────
+
+export const aclTypes = [
+  {
+    type: 'Standard ACL',
+    numbers: '1–99, 1300–1999',
+    matches: 'Source IP address only',
+    placement: 'As close to DESTINATION as possible',
+    placementReason: 'Since it only filters source IPs, placing close to source may accidentally block traffic to other destinations.',
+    syntax: 'access-list 10 permit 192.168.1.0 0.0.0.255\naccess-list 10 deny any',
+    namedSyntax: 'ip access-list standard ALLOW_LAN\n permit 192.168.1.0 0.0.0.255\n deny any',
+  },
+  {
+    type: 'Extended ACL',
+    numbers: '100–199, 2000–2699',
+    matches: 'Source IP, Destination IP, Protocol (TCP/UDP/ICMP), Port number',
+    placement: 'As close to SOURCE as possible',
+    placementReason: 'More granular filtering — place near source to drop unwanted traffic before it traverses the network.',
+    syntax: 'access-list 110 permit tcp 192.168.1.0 0.0.0.255 any eq 80\naccess-list 110 deny ip any any',
+    namedSyntax: 'ip access-list extended WEB_ONLY\n permit tcp 192.168.1.0 0.0.0.255 any eq 80\n permit tcp 192.168.1.0 0.0.0.255 any eq 443\n deny ip any any',
+  },
+]
+
+export const aclRules = [
+  'ACLs are processed top-down — first match wins, rest are ignored.',
+  'There is an IMPLICIT DENY ALL at the end of every ACL (not shown in config).',
+  'Apply to an interface with: ip access-group ACL_NAME in|out — one ACL per interface, per direction, per protocol.',
+  'Inbound ACL: filters traffic ENTERING the interface (before routing decision).',
+  'Outbound ACL: filters traffic LEAVING the interface (after routing decision).',
+  'Named ACLs allow inserting/deleting individual entries (numbered ACLs require full rewrite).',
+  'An empty ACL applied to an interface permits ALL traffic — implicit deny only kicks in once at least one entry exists.',
+  'ACLs do NOT filter traffic originated by the router itself (only transit traffic).',
+  'Place most-frequently-matched entries at the top to reduce processing overhead.',
+]
+
+export const wildcardMasks = [
+  { prefix: '/8',   subnet: '255.0.0.0',       wildcard: '0.255.255.255',   note: 'Match an entire /8 block' },
+  { prefix: '/16',  subnet: '255.255.0.0',     wildcard: '0.0.255.255',     note: 'Match an entire /16 block' },
+  { prefix: '/24',  subnet: '255.255.255.0',   wildcard: '0.0.0.255',       note: 'Match an entire /24 block' },
+  { prefix: '/25',  subnet: '255.255.255.128', wildcard: '0.0.0.127',       note: 'Lower or upper half of a /24' },
+  { prefix: '/26',  subnet: '255.255.255.192', wildcard: '0.0.0.63',        note: '64-address block' },
+  { prefix: '/27',  subnet: '255.255.255.224', wildcard: '0.0.0.31',        note: '32-address block' },
+  { prefix: '/28',  subnet: '255.255.255.240', wildcard: '0.0.0.15',        note: '16-address block' },
+  { prefix: '/30',  subnet: '255.255.255.252', wildcard: '0.0.0.3',         note: 'Point-to-point link (4 addresses)' },
+  { prefix: 'host', subnet: '255.255.255.255', wildcard: '0.0.0.0',         note: 'Exactly one host (host keyword)' },
+  { prefix: 'any',  subnet: '0.0.0.0',         wildcard: '255.255.255.255', note: 'Matches everything (any keyword)' },
+]
+
+// ─── STP (extended) ──────────────────────────────────────────────────────────
+
+export const stpElection = [
+  { step: 1, desc: 'All switches start believing they are the root bridge.' },
+  { step: 2, desc: 'Switches exchange BPDUs (Bridge Protocol Data Units) containing their Bridge ID.' },
+  { step: 3, desc: 'Bridge ID = Bridge Priority (default 32768) + VLAN ID + MAC address.' },
+  { step: 4, desc: 'Switch with the LOWEST Bridge ID becomes root bridge. Tie-break: lowest MAC address.' },
+  { step: 5, desc: 'All ports on the root bridge become Designated Ports (Forwarding).' },
+  { step: 6, desc: 'Each non-root switch elects one Root Port — lowest path cost to the root bridge.' },
+  { step: 7, desc: 'Each segment elects one Designated Port — best path to root on that link.' },
+  { step: 8, desc: 'All remaining ports are blocked (Non-Designated / Alternate) to break loops.' },
+]
+
+export const stpTimers = [
+  { timer: 'Hello Time', default: '2 seconds', desc: 'How often the root bridge sends BPDUs.' },
+  { timer: 'Forward Delay', default: '15 seconds', desc: 'Time spent in Listening and in Learning states (15s each → 30s total before forwarding).' },
+  { timer: 'Max Age', default: '20 seconds', desc: 'How long a stored BPDU stays valid. If none received within Max Age, topology recalculation begins.' },
+]
+
+export const stpFeatures = [
+  { feature: 'PortFast', desc: 'Skips Listening and Learning — port goes straight to Forwarding. ONLY for access ports with end devices, NEVER trunks.', cmd: 'spanning-tree portfast' },
+  { feature: 'BPDU Guard', desc: 'Err-disables a PortFast port if it receives a BPDU. Stops rogue switches from joining the topology.', cmd: 'spanning-tree bpduguard enable' },
+  { feature: 'BPDU Filter', desc: 'Suppresses sending/receiving BPDUs on a port. Dangerous if misused — can create loops.', cmd: 'spanning-tree bpdufilter enable' },
+  { feature: 'Root Guard', desc: 'Blocks a port from becoming a Root Port. Superior BPDUs put it in root-inconsistent state. Protects your root bridge placement.', cmd: 'spanning-tree guard root' },
+  { feature: 'Loop Guard', desc: 'Stops a blocked port from transitioning to forwarding when BPDUs suddenly stop (unidirectional link failure protection).', cmd: 'spanning-tree guard loop' },
+]
+
+// ─── IPv6 (extended) ─────────────────────────────────────────────────────────
+
+export const ipv6AddressTypes = [
+  { type: 'Global Unicast',  prefix: '2000::/3',       equiv: 'Public IPv4',          desc: 'Publicly routable internet addresses assigned by ISP. Begin with 2 or 3.' },
+  { type: 'Link-Local',      prefix: 'FE80::/10',      equiv: 'APIPA (169.254.x.x)',  desc: 'Auto-configured on every IPv6 interface. Not routable. Required for NDP and routing protocol adjacencies.' },
+  { type: 'Unique Local',    prefix: 'FC00::/7',       equiv: 'RFC 1918 private',     desc: 'Private space (in practice FD00::/8). Not globally routable. Internal use.' },
+  { type: 'Multicast',       prefix: 'FF00::/8',       equiv: 'Replaces broadcast',   desc: 'FF02::1 = all nodes, FF02::2 = all routers, FF02::5/::6 = OSPF, FF02::9 = RIPng, FF02::A = EIGRP.' },
+  { type: 'Anycast',         prefix: 'From GUA range', equiv: 'No IPv4 equivalent',   desc: 'Same address on multiple devices; packet delivered to the nearest. Used by CDNs and DNS root servers.' },
+  { type: 'Loopback',        prefix: '::1/128',        equiv: '127.0.0.1',            desc: 'Single loopback address (IPv4 reserves 16M).' },
+  { type: 'Unspecified',     prefix: '::/128',         equiv: '0.0.0.0',              desc: 'Source address before a host has one (used during DAD and DHCPv6 discovery).' },
+]
+
+export const ipv6AutoConfig = [
+  { method: 'SLAAC', full: 'Stateless Address Autoconfiguration', server: 'None', flags: 'M=0, O=0', desc: 'Host combines the /64 prefix from a Router Advertisement with a self-generated interface ID (EUI-64 or random). No server needed.' },
+  { method: 'Stateless DHCPv6', full: 'SLAAC + DHCPv6 options', server: 'DHCPv6 (options only)', flags: 'M=0, O=1', desc: 'Address via SLAAC; DNS servers and other options fetched from DHCPv6.' },
+  { method: 'Stateful DHCPv6', full: 'Full DHCPv6', server: 'DHCPv6 (full)', flags: 'M=1, O=1', desc: 'Server assigns the address and options, and tracks bindings — closest to DHCPv4 behavior.' },
+]
+
+export const ndpMessages = [
+  { type: 'RS — Router Solicitation',    icmpv6: 'Type 133', dst: 'FF02::2 (all routers)',      desc: 'Host requests an immediate Router Advertisement when its interface comes up.' },
+  { type: 'RA — Router Advertisement',   icmpv6: 'Type 134', dst: 'FF02::1 (all nodes)',        desc: 'Router announces prefix, default gateway, and SLAAC/DHCPv6 flags — periodically and in response to RS.' },
+  { type: 'NS — Neighbor Solicitation',  icmpv6: 'Type 135', dst: 'Solicited-node multicast',   desc: 'IPv6\'s ARP request: "who has this address?" Also performs DAD (Duplicate Address Detection).' },
+  { type: 'NA — Neighbor Advertisement', icmpv6: 'Type 136', dst: 'Requester',                  desc: 'IPv6\'s ARP reply — carries the link-layer (MAC) address.' },
+  { type: 'Redirect',                    icmpv6: 'Type 137', dst: 'Original sender',            desc: 'Router informs a host of a better next-hop for a destination.' },
+]
+
+export const eui64Desc = 'EUI-64 builds a 64-bit interface ID from a 48-bit MAC: (1) split the MAC in half, (2) insert FF:FE in the middle, (3) flip the 7th bit (Universal/Local). Example: MAC 00:1A:2B:3C:4D:5E → interface ID 021A:2BFF:FE3C:4D5E, appended to the /64 prefix for the full 128-bit address.'
+
+// ─── DNS (extended) ──────────────────────────────────────────────────────────
+
+export const dnsTtlAndCaching = [
+  { concept: 'TTL (Time to Live)', desc: 'How long resolvers cache a record. Low TTL = fast propagation, more query load. High TTL = fewer queries, slower changes.' },
+  { concept: 'Recursive Query', desc: 'Client asks a resolver to do all the work and return a final answer. Typical client → resolver behavior.' },
+  { concept: 'Iterative Query', desc: 'Server returns its best referral (next NS to ask); the resolver follows the chain root → TLD → authoritative.' },
+  { concept: 'Authoritative Response', desc: 'Answer straight from the zone\'s authoritative server — AA bit set.' },
+  { concept: 'Non-Authoritative (Cached)', desc: 'Answer served from a resolver\'s cache. May be stale. AA bit not set — what nslookup labels "non-authoritative answer."' },
+  { concept: 'Zone Transfer (AXFR / IXFR)', desc: 'Zone replication from primary to secondary DNS servers. AXFR = full, IXFR = incremental. Restrict it — attackers use AXFR for recon.' },
+]
+
+// ─── Enterprise Wireless ─────────────────────────────────────────────────────
+
+export const wirelessApTypes = [
+  { type: 'Autonomous AP', mgmt: 'Per-device', desc: 'Self-contained — auth, encryption, and bridging on the AP itself. Configured individually; fine for small sites, does not scale.' },
+  { type: 'Lightweight AP', mgmt: 'Centralized via WLC', desc: 'Handles only radio/RF; all control, roaming, and policy logic lives on the Wireless LAN Controller over CAPWAP.' },
+  { type: 'Cloud-Managed AP', mgmt: 'Cloud portal', desc: 'Controller function hosted in the cloud (Meraki, Aruba Central, Mist). Zero-touch provisioning at scale.' },
+]
+
+export const capwapFacts = [
+  'Control And Provisioning of Wireless Access Points — successor to LWAPP',
+  'Two channels: Control (UDP 5246, DTLS-encrypted) and Data (UDP 5247, encryption optional)',
+  'AP discovers the WLC via DNS (cisco-capwap-controller), DHCP Option 43, broadcast, or prior knowledge',
+  'AP pulls config, firmware, and certificates from the WLC after joining',
+  'Local mode: all client traffic tunnels to the WLC — central policy, added latency',
+  'FlexConnect mode: data switches locally at the branch, only control goes to the WLC',
+  'The WLC handles Layer 2/3 roaming — clients keep their IP while moving between APs',
+]
+
+// ─── SDN & Network Automation ────────────────────────────────────────────────
+
+export const sdnConcepts = [
+  { concept: 'Control Plane', desc: 'The "brain" — decides where traffic goes. Routing protocols, topology, forwarding-table computation. Centralized in the controller under SDN.' },
+  { concept: 'Data Plane', desc: 'The "muscle" — forwards packets per the forwarding table. Stays on the network devices.' },
+  { concept: 'Management Plane', desc: 'Configuration and monitoring access: SSH, SNMP, NETCONF, REST APIs.' },
+  { concept: 'SDN Controller', desc: 'Central software with a global network view; programs device forwarding via southbound APIs (e.g. Cisco DNA Center, OpenDaylight).' },
+  { concept: 'Northbound API', desc: 'Controller ↔ applications/orchestration. Typically REST + JSON — apps request network services here.' },
+  { concept: 'Southbound API', desc: 'Controller ↔ network devices. OpenFlow, NETCONF, RESTCONF, gRPC.' },
+  { concept: 'Underlay', desc: 'The physical network — actual switches, routers, links.' },
+  { concept: 'Overlay', desc: 'Virtual network tunneled over the underlay (VXLAN, GRE). Foundation of SD-WAN and SD-Access fabrics.' },
+]
+
+export const automationTools = [
+  { tool: 'Ansible', type: 'Agentless (push)', language: 'YAML playbooks', desc: 'De-facto standard for network automation. SSH/API transport, idempotent modules for Cisco, Juniper, Arista.' },
+  { tool: 'Puppet', type: 'Agent-based (pull)', language: 'Puppet DSL', desc: 'Agents check in with a master server. More common on servers than network gear.' },
+  { tool: 'Chef', type: 'Agent-based (pull)', language: 'Ruby cookbooks', desc: 'Similar model to Puppet; rare in pure networking environments.' },
+  { tool: 'Terraform', type: 'Agentless (declarative)', language: 'HCL', desc: 'Infrastructure-as-Code provisioning, strongest in cloud (AWS/Azure/GCP). State-file driven.' },
+  { tool: 'Python + Netmiko', type: 'Scripting', language: 'Python', desc: 'Netmiko wraps SSH sessions to network devices — the entry point for custom automation.' },
+  { tool: 'Cisco DNA Center', type: 'Controller platform', language: 'GUI + REST API', desc: 'Cisco\'s intent-based networking controller for campus: provisioning, assurance, policy.' },
+]
+
+export const netconfYang = [
+  { item: 'NETCONF', desc: 'Network Configuration Protocol (RFC 6241). XML over SSH, port 830. Operations: get-config, edit-config, lock, validate, commit.' },
+  { item: 'YANG', desc: 'Data modeling language (RFC 7950) defining the structure/constraints of config and state data used by NETCONF/RESTCONF.' },
+  { item: 'RESTCONF', desc: 'HTTP/REST flavor of NETCONF (RFC 8040): GET/POST/PUT/PATCH/DELETE with JSON or XML payloads.' },
+  { item: 'gRPC / gNMI', desc: 'High-performance RPC + streaming telemetry. gNMI is the gRPC-based management interface for real-time device state.' },
+  { item: 'OpenFlow', desc: 'The original SDN southbound protocol — directly programs switch flow tables. Historically important, less dominant today.' },
+]

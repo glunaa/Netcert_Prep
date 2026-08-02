@@ -40,6 +40,24 @@ import {
   dhcpDoraSteps,
   dhcpComponents,
   dhcpRelayFacts,
+  natTerminology,
+  natConfig,
+  aclTypes,
+  aclRules,
+  wildcardMasks,
+  stpElection,
+  stpTimers,
+  stpFeatures,
+  ipv6AddressTypes,
+  ipv6AutoConfig,
+  ndpMessages,
+  eui64Desc,
+  dnsTtlAndCaching,
+  wirelessApTypes,
+  capwapFacts,
+  sdnConcepts,
+  automationTools,
+  netconfYang,
 } from '../data/netplusData';
 
 type Tab =
@@ -54,6 +72,10 @@ type Tab =
   | 'troubleshooting'
   | 'networktypes'
   | 'dns'
+  | 'nat'
+  | 'acl'
+  | 'stp'
+  | 'automation'
   | 'quickfacts';
 
 const osiColors: Record<number, string> = {
@@ -170,6 +192,10 @@ const tabs: { id: Tab; label: string }[] = [
   { id: 'troubleshooting', label: 'Troubleshooting' },
   { id: 'networktypes', label: 'Network Types' },
   { id: 'dns', label: 'DNS & DHCP' },
+  { id: 'nat', label: 'NAT / PAT' },
+  { id: 'acl', label: 'ACLs' },
+  { id: 'stp', label: 'STP' },
+  { id: 'automation', label: 'Automation' },
   { id: 'quickfacts', label: 'Quick Facts' },
 ];
 
@@ -854,6 +880,78 @@ export default function NetPlusPage() {
               ))}
             </div>
           </div>
+
+          <div>
+            <SectionHeader title="Address Types (Deep Dive)" />
+            <Table heads={['Type', 'Prefix', 'IPv4 Equivalent', 'Description']}>
+              {ipv6AddressTypes.map((t) => (
+                <Tr
+                  key={t.type}
+                  cells={[
+                    <span className="font-semibold text-slate-200 whitespace-nowrap">
+                      {t.type}
+                    </span>,
+                    <code className="text-xs font-mono text-accent">
+                      {t.prefix}
+                    </code>,
+                    <span className="text-xs">{t.equiv}</span>,
+                    <span className="text-xs">{t.desc}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="Address Autoconfiguration (SLAAC vs DHCPv6)" />
+            <Table
+              heads={['Method', 'Full Name', 'Server', 'RA Flags', 'Description']}
+            >
+              {ipv6AutoConfig.map((m) => (
+                <Tr
+                  key={m.method}
+                  cells={[
+                    <span className="font-bold text-accent whitespace-nowrap">
+                      {m.method}
+                    </span>,
+                    <span className="text-xs text-slate-300">{m.full}</span>,
+                    <span className="text-xs">{m.server}</span>,
+                    <code className="text-xs font-mono text-subtle whitespace-nowrap">
+                      {m.flags}
+                    </code>,
+                    <span className="text-xs">{m.desc}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="NDP — Neighbor Discovery Protocol (replaces ARP)" />
+            <Table heads={['Message', 'ICMPv6', 'Destination', 'Description']}>
+              {ndpMessages.map((m) => (
+                <Tr
+                  key={m.type}
+                  cells={[
+                    <span className="font-semibold text-slate-200">
+                      {m.type}
+                    </span>,
+                    <code className="text-xs font-mono text-accent whitespace-nowrap">
+                      {m.icmpv6}
+                    </code>,
+                    <span className="text-xs font-mono">{m.dst}</span>,
+                    <span className="text-xs">{m.desc}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+            <div className="card p-4 bg-accent/5 border-accent/20">
+              <p className="text-xs text-subtle leading-relaxed">
+                <span className="text-accent font-semibold">EUI-64: </span>
+                {eui64Desc}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1004,6 +1102,36 @@ export default function NetPlusPage() {
                 />
               ))}
             </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="Access Point Deployment Models" />
+            <Table heads={['Type', 'Management', 'Description']}>
+              {wirelessApTypes.map((a) => (
+                <Tr
+                  key={a.type}
+                  cells={[
+                    <span className="font-semibold text-slate-200 whitespace-nowrap">
+                      {a.type}
+                    </span>,
+                    <span className="text-xs whitespace-nowrap">{a.mgmt}</span>,
+                    <span className="text-xs">{a.desc}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="CAPWAP & Wireless LAN Controllers" />
+            <div className="space-y-2">
+              {capwapFacts.map((fact, i) => (
+                <div key={i} className="card p-3 flex items-start gap-2">
+                  <span className="text-accent mt-0.5 shrink-0">›</span>
+                  <p className="text-xs text-subtle">{fact}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -1648,6 +1776,365 @@ export default function NetPlusPage() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div>
+            <SectionHeader title="Queries, TTL & Caching" />
+            <Table heads={['Concept', 'Description']}>
+              {dnsTtlAndCaching.map((c) => (
+                <Tr
+                  key={c.concept}
+                  cells={[
+                    <span className="font-semibold text-slate-200 whitespace-nowrap">
+                      {c.concept}
+                    </span>,
+                    <span className="text-xs text-subtle">{c.desc}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {/* ─── NAT / PAT ─── */}
+      {activeTab === 'nat' && (
+        <div className="space-y-8">
+          <div>
+            <SectionHeader title="NAT Types" />
+            <Table heads={['Type', 'Mapping', 'Description', 'Example']}>
+              {natTypes.map((n) => (
+                <Tr
+                  key={n.type}
+                  cells={[
+                    <span className="font-bold text-accent whitespace-nowrap">
+                      {n.type}
+                    </span>,
+                    <span className="text-xs whitespace-nowrap">
+                      {n.mapping}
+                    </span>,
+                    <span className="text-xs">{n.description}</span>,
+                    <code className="text-xs font-mono text-subtle">
+                      {n.example}
+                    </code>,
+                  ]}
+                />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="NAT Terminology (Cisco)" />
+            <Table heads={['Term', 'Definition']}>
+              {natTerminology.map((t) => (
+                <Tr
+                  key={t.term}
+                  cells={[
+                    <span className="font-semibold text-slate-200 whitespace-nowrap">
+                      {t.term}
+                    </span>,
+                    <span className="text-xs text-subtle">{t.def}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+            <div className="card p-4 bg-accent/5 border-accent/20 mb-6">
+              <p className="text-xs text-subtle">
+                <span className="text-accent font-semibold">Memory hook: </span>
+                "Inside/Outside" = where the host physically lives.
+                "Local/Global" = whose perspective the address is seen from
+                (local = inside view, global = outside view).
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="PAT Configuration (Cisco IOS)" />
+            <div className="space-y-3">
+              {natConfig.map((s) => (
+                <div key={s.step} className="card p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 flex items-center justify-center text-xs font-mono font-bold text-accent shrink-0">
+                      {s.step}
+                    </span>
+                    <span className="text-sm font-semibold text-slate-200">
+                      {s.action}
+                    </span>
+                  </div>
+                  <pre className="bg-surface rounded-lg p-3 text-xs font-mono text-accent overflow-x-auto whitespace-pre border border-border/50">
+                    {s.cmd}
+                  </pre>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── ACLs ─── */}
+      {activeTab === 'acl' && (
+        <div className="space-y-8">
+          <div>
+            <SectionHeader title="Standard vs Extended ACLs" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+              {aclTypes.map((a) => (
+                <div key={a.type} className="card p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-bold text-accent">{a.type}</h3>
+                    <span className="text-xs font-mono text-subtle bg-surface px-2 py-0.5 rounded border border-border">
+                      {a.numbers}
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-xs mb-4">
+                    <p>
+                      <span className="text-slate-300 font-semibold">
+                        Matches:{' '}
+                      </span>
+                      <span className="text-subtle">{a.matches}</span>
+                    </p>
+                    <p>
+                      <span className="text-slate-300 font-semibold">
+                        Placement:{' '}
+                      </span>
+                      <span className="text-aws font-medium">{a.placement}</span>
+                    </p>
+                    <p className="text-subtle leading-relaxed">
+                      {a.placementReason}
+                    </p>
+                  </div>
+                  <pre className="bg-surface rounded-lg p-3 text-xs font-mono text-accent overflow-x-auto whitespace-pre border border-border/50 mb-2">
+                    {a.syntax}
+                  </pre>
+                  <p className="text-[10px] text-subtle uppercase tracking-wider mb-1">
+                    Named version
+                  </p>
+                  <pre className="bg-surface rounded-lg p-3 text-xs font-mono text-slate-300 overflow-x-auto whitespace-pre border border-border/50">
+                    {a.namedSyntax}
+                  </pre>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="Processing Rules" />
+            <div className="space-y-2 mb-6">
+              {aclRules.map((rule, i) => (
+                <div key={i} className="card p-3 flex items-start gap-3">
+                  <span className="text-accent font-mono font-bold text-xs mt-0.5 shrink-0">
+                    {i + 1}.
+                  </span>
+                  <p className="text-xs text-subtle">{rule}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="Wildcard Mask Reference" />
+            <Table heads={['Prefix', 'Subnet Mask', 'Wildcard Mask', 'Note']}>
+              {wildcardMasks.map((w) => (
+                <Tr
+                  key={w.prefix}
+                  cells={[
+                    <span className="font-bold text-accent font-mono">
+                      {w.prefix}
+                    </span>,
+                    <code className="text-xs font-mono text-slate-300">
+                      {w.subnet}
+                    </code>,
+                    <code className="text-xs font-mono text-aws">
+                      {w.wildcard}
+                    </code>,
+                    <span className="text-xs">{w.note}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+            <div className="card p-4 bg-accent/5 border-accent/20">
+              <p className="text-xs text-subtle">
+                <span className="text-accent font-semibold">Shortcut: </span>
+                Wildcard mask = 255.255.255.255 minus the subnet mask. Each
+                wildcard bit set to 1 means "ignore this bit"; 0 means "must
+                match exactly."
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── STP ─── */}
+      {activeTab === 'stp' && (
+        <div className="space-y-8">
+          <div>
+            <SectionHeader title="Root Bridge Election" />
+            <div className="space-y-2 mb-6">
+              {stpElection.map((s) => (
+                <div key={s.step} className="card p-3 flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 flex items-center justify-center text-xs font-mono font-bold text-accent shrink-0">
+                    {s.step}
+                  </span>
+                  <p className="text-xs text-subtle mt-1">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <SectionHeader title="Port States" />
+            <Table heads={['State', 'Duration', 'Activity']}>
+              {stpPortStates.map((s) => (
+                <Tr
+                  key={s.state}
+                  cells={[
+                    <span className="font-bold text-accent">{s.state}</span>,
+                    <span className="text-xs whitespace-nowrap">
+                      {s.duration}
+                    </span>,
+                    <span className="text-xs">{s.activity}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="Port Roles" />
+            <Table heads={['Role', 'Description']}>
+              {stpPortRoles.map((r) => (
+                <Tr
+                  key={r.role}
+                  cells={[
+                    <span className="font-semibold text-slate-200 whitespace-nowrap">
+                      {r.role}
+                    </span>,
+                    <span className="text-xs">{r.description}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="Timers" />
+            <Table heads={['Timer', 'Default', 'Description']}>
+              {stpTimers.map((t) => (
+                <Tr
+                  key={t.timer}
+                  cells={[
+                    <span className="font-semibold text-slate-200 whitespace-nowrap">
+                      {t.timer}
+                    </span>,
+                    <span className="text-xs font-mono text-accent whitespace-nowrap">
+                      {t.default}
+                    </span>,
+                    <span className="text-xs">{t.desc}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="STP Versions" />
+            <Table
+              heads={['Version', 'Standard', 'Convergence', 'Instances', 'Notes']}
+            >
+              {stpVariants.map((v) => (
+                <Tr
+                  key={v.name}
+                  cells={[
+                    <span className="font-bold text-accent whitespace-nowrap">
+                      {v.name}
+                    </span>,
+                    <span className="text-xs font-mono">{v.std}</span>,
+                    <span className="text-xs whitespace-nowrap">
+                      {v.convergence}
+                    </span>,
+                    <span className="text-xs">{v.instances}</span>,
+                    <span className="text-xs">{v.vlans}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="Protection Features" />
+            <Table heads={['Feature', 'Description', 'Cisco Command']}>
+              {stpFeatures.map((f) => (
+                <Tr
+                  key={f.feature}
+                  cells={[
+                    <span className="font-bold text-accent whitespace-nowrap">
+                      {f.feature}
+                    </span>,
+                    <span className="text-xs">{f.desc}</span>,
+                    <code className="text-xs font-mono text-slate-300 whitespace-nowrap">
+                      {f.cmd}
+                    </code>,
+                  ]}
+                />
+              ))}
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Automation & SDN ─── */}
+      {activeTab === 'automation' && (
+        <div className="space-y-8">
+          <div>
+            <SectionHeader title="SDN Architecture" />
+            <Table heads={['Concept', 'Description']}>
+              {sdnConcepts.map((c) => (
+                <Tr
+                  key={c.concept}
+                  cells={[
+                    <span className="font-semibold text-slate-200 whitespace-nowrap">
+                      {c.concept}
+                    </span>,
+                    <span className="text-xs text-subtle">{c.desc}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="Automation Tools" />
+            <Table heads={['Tool', 'Model', 'Language', 'Description']}>
+              {automationTools.map((t) => (
+                <Tr
+                  key={t.tool}
+                  cells={[
+                    <span className="font-bold text-accent whitespace-nowrap">
+                      {t.tool}
+                    </span>,
+                    <span className="text-xs whitespace-nowrap">{t.type}</span>,
+                    <span className="text-xs font-mono">{t.language}</span>,
+                    <span className="text-xs">{t.desc}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
+          </div>
+
+          <div>
+            <SectionHeader title="Programmability Protocols" />
+            <Table heads={['Protocol', 'Description']}>
+              {netconfYang.map((p) => (
+                <Tr
+                  key={p.item}
+                  cells={[
+                    <span className="font-bold text-accent whitespace-nowrap">
+                      {p.item}
+                    </span>,
+                    <span className="text-xs text-subtle">{p.desc}</span>,
+                  ]}
+                />
+              ))}
+            </Table>
           </div>
         </div>
       )}

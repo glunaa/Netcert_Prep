@@ -18,7 +18,7 @@ function scoreColor(score: number | null): string {
   return 'text-danger'
 }
 
-function ScoreChart({ history, passLine }: { history: ScoreHistoryEntry[]; passLine: number }) {
+function ScoreChart({ history, passLine, strokeRgb = '0,212,255' }: { history: ScoreHistoryEntry[]; passLine: number; strokeRgb?: string }) {
   if (history.length < 2) {
     return (
       <div className="mt-4 flex items-center justify-center h-12 rounded border border-border/40 bg-surface/30">
@@ -45,7 +45,7 @@ function ScoreChart({ history, passLine }: { history: ScoreHistoryEntry[]; passL
         <line x1={PAD} y1={passY} x2={W - PAD} y2={passY}
           stroke="rgba(255,255,255,0.12)" strokeWidth="1" strokeDasharray="4 3" />
         <text x={W - PAD + 3} y={passY + 3.5} fontSize="7" fill="rgba(255,255,255,0.25)">pass</text>
-        <path d={d} fill="none" stroke="rgba(0,212,255,0.55)" strokeWidth="1.5"
+        <path d={d} fill="none" stroke={`rgba(${strokeRgb},0.55)`} strokeWidth="1.5"
           strokeLinejoin="round" strokeLinecap="round" />
         <circle cx={last.x} cy={last.y} r="3" fill={dotColor} />
       </svg>
@@ -167,13 +167,13 @@ export default function HomePage() {
           {
             label: 'Network+', code: 'N10-009', tagCls: 'tag-net', borderCls: 'glow-accent',
             attempts: progress.netplus.attempts as number, last: netplusLast, best: netplusBest,
-            pass: 75, barCls: 'bg-accent', icon: 'text-accent',
+            pass: 75, barCls: 'bg-accent', icon: 'text-accent', chartRgb: '0,212,255',
             history: progress.netplus.history,
           },
           {
             label: 'AWS CLF', code: 'CLF-C02', tagCls: 'tag-aws', borderCls: 'glow-aws',
             attempts: progress.aws.attempts as number, last: awsLast, best: awsBest,
-            pass: 72, barCls: 'bg-aws', icon: 'text-aws',
+            pass: 72, barCls: 'bg-aws', icon: 'text-aws', chartRgb: '255,153,0',
             history: progress.aws.history,
           },
         ].map((stat) => (
@@ -206,7 +206,7 @@ export default function HomePage() {
                 <div className={`progress-fill ${stat.barCls}`} style={{ width: `${stat.best !== null ? Math.min(stat.best, 100) : 0}%` }} />
               </div>
             </div>
-            <ScoreChart history={stat.history} passLine={stat.pass} />
+            <ScoreChart history={stat.history} passLine={stat.pass} strokeRgb={stat.chartRgb} />
           </div>
         ))}
       </section>
